@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { DEMO } from "@/data/seed";
 import { numero } from "@/lib/format";
 import { useEstado } from "@/lib/store";
-import type { Solicitante } from "@/lib/types";
+import type { Estado, Pedido, Solicitante } from "@/lib/types";
 
 export type PerfilMovel = "cidadao" | "comerciante";
 
@@ -22,6 +22,24 @@ export function SemSolicitante() {
       titulo="Não encontramos o cadastro de exemplo"
       texto="Use o botão de reiniciar dados de exemplo, no topo da tela, para voltar ao começo."
     />
+  );
+}
+
+// "4 kg de PET, 3 kg de Latas". Material desconhecido não quebra a tela.
+export function descreverItens(estado: Estado, pedido: Pedido): string {
+  return pedido.itens
+    .map((i) => {
+      const m = estado.materiais.find((x) => x.id === i.materialId);
+      return `${numero(i.quantidade)} ${m?.unidade ?? "un"} de ${m?.nome ?? "material"}`;
+    })
+    .join(", ");
+}
+
+// Nome de quem pediu a coleta; rótulo genérico se o cadastro sumiu do estado.
+export function nomeDoSolicitante(estado: Estado, pedido: Pedido): string {
+  return (
+    estado.solicitantes.find((s) => s.id === pedido.solicitanteId)?.nome ??
+    "Solicitante sem cadastro"
   );
 }
 

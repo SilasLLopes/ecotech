@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
+import { PedidosProximos } from "@/components/catador/pedidos-proximos";
 
-export const metadata: Metadata = { title: "Catador" };
+export const metadata: Metadata = { title: "Pedidos próximos (catador)" };
 
 export default function Page() {
-  return (
-    <h1 className="text-2xl font-bold text-graphite">Pedidos de coleta</h1>
-  );
+  return <PedidosProximos />;
 }

@@ -85,6 +85,12 @@ function despachar(acao: Acao): void {
   notificar();
 }
 
+// Leitura síncrona e fresca (relê o localStorage), para handlers de evento que
+// precisam conferir o resultado de um dispatch ou o que outra aba mudou.
+export function obterEstado(): Estado {
+  return lerEstado();
+}
+
 export function useEstado(): Estado {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

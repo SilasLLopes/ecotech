@@ -11,6 +11,7 @@ import { useDispatch, useEstado } from "@/lib/store";
 import type { Estado, Material, Meta, Pedido } from "@/lib/types";
 import {
   CartaoSaldo,
+  descreverItens,
   formatarEm,
   SemSolicitante,
   useSolicitante,
@@ -31,15 +32,6 @@ function pedidoAtivo(estado: Estado, solicitanteId: string): Pedido | undefined 
 function nomeNaFrase(m: Material | undefined): string {
   if (!m) return "um material";
   return m.id === "pet" ? "garrafa PET" : m.nome.toLowerCase();
-}
-
-function descreverItens(estado: Estado, pedido: Pedido): string {
-  return pedido.itens
-    .map((i) => {
-      const m = estado.materiais.find((x) => x.id === i.materialId);
-      return `${numero(i.quantidade)} ${m?.unidade ?? "un"} de ${m?.nome ?? "material"}`;
-    })
-    .join(", ");
 }
 
 const ETAPAS = [
