@@ -24,7 +24,7 @@ export function AppShell({
   return (
     <div className="flex min-h-dvh flex-1 flex-col lg:flex-row">
       <a
-        href="#conteudo"
+        href={`#conteudo-${perfil}`}
         className={`sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary-strong focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-white ${FOCO}`}
       >
         Pular para o conteúdo
@@ -52,7 +52,7 @@ export function AppShell({
         </header>
         <AvisoExemplo />
         <main
-          id="conteudo"
+          id={`conteudo-${perfil}`}
           tabIndex={-1}
           className={`w-full flex-1 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6 focus:outline-none ${
             painel ? "lg:pb-10" : ""

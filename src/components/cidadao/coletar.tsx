@@ -246,7 +246,7 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
           grande
           fullWidth
           disabled={vazio}
-          aria-describedby={vazio ? "motivo-pedir" : undefined}
+          aria-describedby={vazio ? `${uid}-motivo-pedir` : undefined}
           onClick={pedir}
         >
           Pedir coleta
