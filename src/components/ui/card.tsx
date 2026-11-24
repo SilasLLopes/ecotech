@@ -1,14 +1,22 @@
-import type { ElementType, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 
-type CardProps = {
-  as?: ElementType;
+type CardProps<T extends ElementType> = {
+  as?: T;
   className?: string;
   children: ReactNode;
-};
+} & Omit<ComponentPropsWithoutRef<T>, "as" | "className" | "children">;
 
-export function Card({ as: Tag = "div", className, children }: CardProps) {
+// Repassa o resto das props (id, href, aria-*, role) ao elemento.
+export function Card<T extends ElementType = "div">({
+  as,
+  className,
+  children,
+  ...rest
+}: CardProps<T>) {
+  const Tag: ElementType = as ?? "div";
   return (
     <Tag
+      {...rest}
       className={`rounded-lg border border-border-soft bg-white p-6 shadow-card ${className ?? ""}`.trim()}
     >
       {children}

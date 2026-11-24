@@ -17,7 +17,9 @@ export type IconeNome =
   | "caminhao"
   | "relogio"
   | "x"
-  | "seta";
+  | "seta"
+  | "reiniciar"
+  | "chevron";
 
 // Traçados em grade 24x24, traço de 1,75, pontas arredondadas, currentColor.
 const TRACADOS: Record<IconeNome, ReactNode> = {
@@ -105,6 +107,13 @@ const TRACADOS: Record<IconeNome, ReactNode> = {
   ),
   x: <path d="m6 6 12 12M18 6 6 18" />,
   seta: <path d="M5 12h14M13 6l6 6-6 6" />,
+  reiniciar: (
+    <>
+      <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3L19.5 8.5" />
+      <path d="M19.5 4v4.5H15" />
+    </>
+  ),
+  chevron: <path d="m7 10 5 5 5-5" />,
 };
 
 type IconProps = {
