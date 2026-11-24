@@ -101,7 +101,23 @@ export function reiniciar(): void {
   notificar();
 }
 
+let contador = 0;
+
 // Só chamar em handlers de evento (nunca durante a renderização).
+// crypto.randomUUID só existe em contexto seguro (https/localhost); numa página
+// aberta por http://<ip-da-rede>:3000 cai para getRandomValues ou, por último,
+// contador + Math.random.
 export function novoId(prefixo: string): string {
-  return `${prefixo}-${crypto.randomUUID().slice(0, 8)}`;
+  const c: Crypto | undefined = globalThis.crypto;
+  let sufixo: string;
+  if (c && typeof c.randomUUID === "function") {
+    sufixo = c.randomUUID().slice(0, 8);
+  } else if (c && typeof c.getRandomValues === "function") {
+    const bytes = c.getRandomValues(new Uint8Array(4));
+    sufixo = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  } else {
+    contador += 1;
+    sufixo = (contador.toString(36) + Math.random().toString(36).slice(2, 8)).slice(0, 8);
+  }
+  return `${prefixo}-${sufixo}`;
 }
