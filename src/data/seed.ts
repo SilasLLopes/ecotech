@@ -103,7 +103,8 @@ const METAS_PADRAO = () => [
 
 // Regras seguidas pelo seed (para o reducer ficar coerente):
 // - pontos dos pedidos coletados = pontosDoPedido com o destaque abaixo;
-// - saldo da Ana = soma do extrato dela (4 coletas + 4 bônus diários);
+// - saldo de cada solicitante = soma do extrato dele (Ana: 4 coletas + 4 bônus
+//   diários; Mercadinho: 3 coletas, sem metas; Carlos: sem histórico, saldo 0);
 // - ids únicos; pontos dos pedidos dentro do polígono do bairro.
 export const ESTADO_INICIAL: Estado = {
   versao: 1,
@@ -137,7 +138,7 @@ export const ESTADO_INICIAL: Estado = {
       bairro: "Campo Velho",
       endereco: "Avenida Dom Aureliano Neto, 480",
       ponto: { x: 110, y: 80 },
-      saldo: 0,
+      saldo: 155,
       metas: [],
     },
     {
@@ -243,6 +244,52 @@ export const ESTADO_INICIAL: Estado = {
       catadorId: "c-francisca",
       pontos: 28,
       criadoEm: "2026-11-20T13:20:00",
+    },
+    // Coletados do Mercadinho Bom Preço (histórico do comerciante; PET x1,25).
+    {
+      id: "p-011",
+      solicitanteId: "s-mercadinho",
+      itens: [
+        { materialId: "pet", quantidade: 4 },
+        { materialId: "vidro", quantidade: 5 },
+      ],
+      endereco: "Avenida Dom Aureliano Neto, 480",
+      bairro: "Campo Velho",
+      ponto: { x: 110, y: 80 },
+      janela: "Hoje, 10h às 12h",
+      status: "coletado",
+      catadorId: "c-raimundo",
+      pontos: 55,
+      criadoEm: "2026-11-06T07:45:00",
+    },
+    {
+      id: "p-012",
+      solicitanteId: "s-mercadinho",
+      itens: [
+        { materialId: "latas", quantidade: 3 },
+        { materialId: "papelao", quantidade: 6 },
+      ],
+      endereco: "Avenida Dom Aureliano Neto, 480",
+      bairro: "Campo Velho",
+      ponto: { x: 110, y: 80 },
+      janela: "Hoje, 10h às 12h",
+      status: "coletado",
+      catadorId: "c-joao",
+      pontos: 60,
+      criadoEm: "2026-11-13T08:05:00",
+    },
+    {
+      id: "p-013",
+      solicitanteId: "s-mercadinho",
+      itens: [{ materialId: "oleo", quantidade: 4 }],
+      endereco: "Avenida Dom Aureliano Neto, 480",
+      bairro: "Campo Velho",
+      ponto: { x: 110, y: 80 },
+      janela: "Hoje, 14h às 16h",
+      status: "coletado",
+      catadorId: "c-raimundo",
+      pontos: 40,
+      criadoEm: "2026-11-19T11:15:00",
     },
     // Aceito pelo João (demonstração do catador).
     {
@@ -369,7 +416,8 @@ export const ESTADO_INICIAL: Estado = {
     },
   ],
   resgates: [],
-  // Soma = 140 = saldo da Ana. Bônus diário de 5 em cada dia de coleta.
+  // Ana: soma = 140 = saldo, com bônus diário de 5 em cada dia de coleta.
+  // Mercadinho: soma = 155 = saldo (sem metas, só coletas).
   extrato: [
     { id: "l-001", solicitanteId: "s-ana", descricao: "Coleta concluída", pontos: 38, em: "2026-11-03T15:10:00" },
     { id: "l-001-meta-dia", solicitanteId: "s-ana", descricao: "Bônus da meta: 1 coleta hoje", pontos: 5, em: "2026-11-03T15:10:00" },
@@ -379,6 +427,9 @@ export const ESTADO_INICIAL: Estado = {
     { id: "l-003-meta-dia", solicitanteId: "s-ana", descricao: "Bônus da meta: 1 coleta hoje", pontos: 5, em: "2026-11-17T14:35:00" },
     { id: "l-004", solicitanteId: "s-ana", descricao: "Coleta concluída", pontos: 28, em: "2026-11-20T16:45:00" },
     { id: "l-004-meta-dia", solicitanteId: "s-ana", descricao: "Bônus da meta: 1 coleta hoje", pontos: 5, em: "2026-11-20T16:45:00" },
+    { id: "l-011", solicitanteId: "s-mercadinho", descricao: "Coleta concluída", pontos: 55, em: "2026-11-06T11:20:00" },
+    { id: "l-012", solicitanteId: "s-mercadinho", descricao: "Coleta concluída", pontos: 60, em: "2026-11-13T10:40:00" },
+    { id: "l-013", solicitanteId: "s-mercadinho", descricao: "Coleta concluída", pontos: 40, em: "2026-11-19T15:30:00" },
   ],
   eventos: [
     {
