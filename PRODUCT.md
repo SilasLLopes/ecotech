@@ -21,6 +21,8 @@ Quatro públicos, confirmados pelo responsável do projeto:
 3. **Administradores**: equipe EcoTech ou poder público. Usam o painel (dashboard, mapa, usuários, recompensas, relatórios).
 4. **Empresas patrocinadoras**: oferecem benefícios em troca dos pontos dos cidadãos.
 
+**Atualização de 2026-11-24 (decisões C-06 a C-12):** o produto é coleta sob demanda, estilo iFood/99, com três perfis: cidadão/comerciante, catador e Prefeitura (dona). O cidadão avisa que tem material, o catador recebe o pedido, junta vários numa rota e coleta; cada coleta gera pontos trocáveis por benefícios em comércios; a Prefeitura guia o rodízio semanal de valores. Cidade de referência: Quixadá (CE). A lista de quatro públicos acima é anterior e fica superada onde conflitar. O MVP em andamento é um protótipo sem autenticação (ver `docs/superpowers/specs/2026-11-24-mvp-coleta-design.md`).
+
 Perfis, permissões e fluxos detalhados de cada público: **[ABERTO]**.
 
 ## Product Purpose
