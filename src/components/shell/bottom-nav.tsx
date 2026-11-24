@@ -24,14 +24,14 @@ export function BottomNav({ perfil }: { perfil: Perfil }) {
               <Link
                 href={item.href}
                 aria-current={ativo ? "page" : undefined}
-                className={`flex min-h-16 flex-col items-center justify-center gap-1 border-t-[3px] px-1 text-xs focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-tech-blue ${
+                className={`flex min-h-16 flex-col items-center justify-center gap-1 border-t-[3px] px-0.5 text-center text-xs leading-tight focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-tech-blue ${
                   ativo
                     ? "border-primary-strong bg-mint-wash font-semibold text-primary-strong"
                     : "border-transparent font-medium text-text-muted hover:bg-mint-wash"
                 }`}
               >
                 <Icon nome={item.icone} />
-                <span className="max-w-full truncate">{item.rotulo}</span>
+                <span className="max-w-full">{item.rotulo}</span>
               </Link>
             </li>
           );
