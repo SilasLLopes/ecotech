@@ -38,7 +38,7 @@ export default function Home() {
                     <span className="text-xl font-semibold">{PERFIS[p].rotulo}</span>
                     <span className="text-text-muted">{PERFIS[p].frase}</span>
                   </span>
-                  <Icon nome="seta" className="text-primary-strong" />
+                  <Icon nome="seta" className="size-5 text-primary-strong" />
                 </Card>
               </li>
             ))}

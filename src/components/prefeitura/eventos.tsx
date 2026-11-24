@@ -202,7 +202,7 @@ export function Eventos() {
           tabIndex={aviso.foco === "aviso" ? -1 : undefined}
           className="flex scroll-mt-20 items-start gap-2 rounded-lg bg-mint-wash p-4 text-base font-semibold text-primary-strong focus:outline-3 focus:outline-offset-2 focus:outline-tech-blue"
         >
-          <Icon nome="check" className="mt-0.5" />
+          <Icon nome="check" className="mt-0.5 size-5" />
           {aviso.texto}
         </p>
       )}
