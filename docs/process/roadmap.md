@@ -1,6 +1,23 @@
 # Roadmap de desenvolvimento (proposta)
 
-Sequência sugerida para iniciar o desenvolvimento. É uma **proposta** derivada do board e do estado do repositório; escopo funcional, prazos e prioridades dependem da equipe (ver [`decisions.md`](./decisions.md)). Cada fase termina com a definição de pronto de [`workflow.md`](./workflow.md) §6.
+Sequência sugerida para o desenvolvimento. É uma **proposta** derivada do board e do estado do repositório; escopo funcional, prazos e prioridades dependem da equipe (ver [`decisions.md`](./decisions.md)). Cada fase termina com a definição de pronto de [`workflow.md`](./workflow.md) §6.
+
+## Situação atual
+
+**Fase "Protótipo": concluída (2026-11-24).** O MVP de coleta (C-07, C-08, C-12) está no repositório como protótipo navegável com quatro perfis (cidadão, comerciante, catador, Prefeitura), dados de exemplo de Quixadá, estado no navegador, mapa SVG esquemático e rota por vizinho mais próximo. Cobre a fundação de marca e os componentes (Fase 0), um shell por perfil e uma tela de entrada de perfis em vez de login (Fase 1, sem login), pedidos e rota em vez do mapa de pontos (Fase 2, substituída), pontos e recompensas (Fase 3) e um painel da Prefeitura (Fase 4) com dados de exemplo. Telas e componentes: [`screens.md`](../design/screens.md) §10 e [`components.md`](../design/components.md). Limitações: [`decisions.md`](./decisions.md).
+
+As fases 0 a 5 abaixo são o plano **original**, anterior ao modelo de coleta sob demanda; leia-as como histórico. As próximas fases reais são as da seção seguinte.
+
+## Próximas fases (reais)
+
+Cada uma depende de decisões ainda **[ABERTO]** em [`decisions.md`](./decisions.md); não comece sem fechar a dependência.
+
+1. **Backend e persistência** (D-01): trocar o estado em `localStorage` por banco e API, mantendo o reducer de `src/lib/coleta.ts` como referência das regras. Hoje há um catador e um solicitante fixos por perfil.
+2. **Autenticação e associação** (D-02, D-17, C-10): login real para cidadão, comerciante, catador associado e Prefeitura; fluxo de associação do catador; papéis e permissões no servidor (hoje o perfil vem da URL, C-13).
+3. **Regras reais de pontos e rodízio** (D-04, D-18, C-09): valores por material, bônus, metas, validação da coleta, antifraude, limites do multiplicador. Hoje todos os valores são de exemplo.
+4. **Mapa e rota reais** (D-03, D-19, D-14): provedor de mapa, endereço real e geolocalização com consentimento (LGPD), rota com trânsito, janela de horário e capacidade do catador.
+5. **Eventos e anúncios reais** (C-08): ciclo de vida do evento (aberto e encerrado; hoje todos contam como abertos), pagamento ou contrapartida do patrocínio, análise com histórico.
+6. **Qualidade e operação** (D-15, D-16): testes de interface e e2e, CI, hospedagem, auditoria de acessibilidade e performance.
 
 ## Fase 0: Fundação de marca no código
 

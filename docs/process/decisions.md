@@ -18,6 +18,20 @@ Registro único do que está **decidido** e do que está **em aberto**. Agentes:
 | C-10 | **Catador só tem login se for associado pela Prefeitura** | Responsável do projeto, 2026-11-24 |
 | C-11 | Início do cidadão: saldo de pontos + botão "Tenho material para ser reciclado", que abre a lista de itens específicos | Responsável do projeto, 2026-11-24 |
 | C-12 | **MVP de demonstração** (substitui C-05): protótipo navegável sem autenticação nem cadastro, dados fictícios realistas e marcados como exemplo, estado no navegador, mapa SVG esquemático. Design em `docs/superpowers/specs/2026-11-24-mvp-coleta-design.md` | Responsável do projeto, 2026-11-24 |
+| C-13 | **O perfil ativo vem da URL** (`/cidadao`, `/catador`...), não de `localStorage`. Desvio do plano inicial, para que duas abas mostrem perfis diferentes no mesmo navegador (necessário para a demonstração ponta a ponta). O estado dos dados (pedidos, saldo, benefícios) continua em `localStorage` (chave `ecotech-mvp-v1`) e sincroniza entre abas | Implementação do MVP, 2026-11-24 |
+
+### Limitações conhecidas do protótipo
+
+Não são bugs a corrigir antes do produto real; ficam registradas para não serem tomadas por regra de negócio.
+
+| Item | Situação no MVP |
+|---|---|
+| Eventos | O modelo de dados não tem estado "encerrado": **todos os eventos do seed contam como abertos** para patrocínio. Datas são de exemplo |
+| Rota após recarregar | A ordem da rota é recalculada a partir da origem do catador. Depois de recarregar `/catador/rota`, a posição "atual" (última parada coletada) se perde e a rota recomeça da origem do catador |
+| Usuários fixos | Um cidadão (Ana), um comerciante (Mercadinho Bom Preço) e um catador (João) de exemplo. Não há cadastro. "Reiniciar dados de exemplo" volta ao seed; estado salvo antes de uma mudança do seed só atualiza ao reiniciar |
+| Pontos | Todos os valores, metas, bônus e o multiplicador (de ×1,00 a ×1,50, passo 0,05) são de exemplo (D-04 segue aberto) |
+| Texto da entrada do comerciante | A frase "Marque o material do comércio e ofereça benefícios" foi escrita pela implementação e **precisa de confirmação do responsável do projeto** |
+| Estimativa de rota | Vizinho mais próximo em linha reta; 60 m/min e 4 min por parada são valores de exemplo. A tela rotula como estimativa (D-19 aberto) |
 
 ## Em aberto
 
@@ -32,14 +46,14 @@ Marcados com a **opção recomendada** (a menos custosa de reverter) para aceler
 | D-05 | Idiomas (só pt-BR ou mais?) | Só pt-BR; texto já separado de componentes quando simples | i18n |
 | D-06 | Modo escuro do produto | Só tema claro no início; marca já tem versões `on-dark` | Tokens |
 | D-07 | Cores derivadas (`mint-surface`, `mint-wash`, `border-soft`, `text-muted`, `danger`, `warning`) | Manter como estão em DESIGN.md | Todos os componentes |
-| D-08 | Biblioteca de ícones | Lucide (traço arredondado, combina com o board) | Ícones |
+| D-08 | Biblioteca de ícones. *Nota: o MVP usa SVG inline próprio (`ui/icon.tsx`, traço 1,75), sem biblioteca; a decisão segue aberta para o produto real* | Lucide (traço arredondado, combina com o board) | Ícones |
 | D-09 | Área de respiro e tamanho mínimo do logotipo | Valores propostos no guia de marca | Uso do logo |
 | D-10 | Uso de imagem gerada por IA / banco de fotos | Fotografia real licenciada ou própria | Banners, institucional |
 | D-11 | **Adaptação do board:** botões com `primary-strong` (#126B4A) em vez do verde vivo do board, por contraste (3,24:1 vs 6,51:1) | Manter a adaptação | Botões, barra lateral |
 | D-12 | Vetores oficiais da logo (designer) | Substituir `public/brand/*` mantendo nomes | Marca |
 | D-13 | PWA ou app nativo | Web responsivo; PWA depois, guia em `01-app/02-guides/progressive-web-apps.md` | Ícones PNG, offline |
 | D-14 | LGPD: base legal, consentimento de localização, retenção, DPO | Pedir consentimento granular; dados mínimos | Mapa, cadastro |
-| D-15 | Testes (unitário/e2e) e CI | Vitest + Playwright; CI com lint, tipos e build | Definição de pronto |
+| D-15 | Testes (unitário/e2e) e CI. *Nota: o MVP roda `npm test` com `node --test` só em `src/lib` (reducer, rota, formatação), sem dependência nova; interface e e2e seguem abertos* | Vitest + Playwright; CI com lint, tipos e build | Definição de pronto |
 | D-16 | Hospedagem/deploy | Aberto; guias em `01-app/02-guides/deploying-to-platforms.md` | Release |
 | D-17 | Como a Prefeitura associa um catador (convite, cadastro interno, lista) e o que o catador vê antes de ser associado | Convite emitido pela Prefeitura | Login do catador real |
 | D-18 | Rodízio semanal: quem escolhe o item (manual ou calendário), limite de variação de valor, histórico visível ao cidadão | Prefeitura escolhe em painel; limite configurável; cidadão vê "item da semana" | Painel, regras reais |

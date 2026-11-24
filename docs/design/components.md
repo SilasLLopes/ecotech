@@ -83,3 +83,57 @@ Fundo branco (ou `mint-surface`), largura 240px (colapsa em ícones no `lg-`, ga
 ## Pino do mapa
 
 Hexágono (do símbolo) em `primary-strong` com ícone branco; selecionado: maior, com contorno branco e `shadow-raised`; agrupamento: círculo `tech-blue` com contagem em branco (4,6:1). Cada ponto tem alternativa em lista (o mapa nunca é o único caminho). Provedor de mapa: **[ABERTO]** D-03.
+
+---
+
+# Componentes do MVP de coleta
+
+Implementados em `src/components/`. Descrevem o que existe no código; o que está acima continua valendo como receita. Os átomos ficam em `ui/`; as composições, na pasta da área.
+
+## Ícone (`ui/icon.tsx`)
+
+SVG inline próprio, grade 24×24, traço 1,75, pontas arredondadas, `currentColor`, `aria-hidden` (decorativo; o texto vizinho ou o `aria-label` do controle dá o nome). Sem biblioteca (D-08 segue aberto; o MVP usa SVG próprio).
+
+- `nome`: um de `IconeNome` (folha, pino, trofeu, pessoas, casa, rota, check, mais, menos, presente, calendario, megafone, grafico, caminhao, relogio, x, seta, reiniciar, chevron).
+- `tamanho`: `sm` (16px), `md` (20px, padrão), `lg` (24px), `xl` (28px). O tamanho é uma prop e **não** vem de `className`: duas classes `size-*` no mesmo elemento brigam por ordem de CSS (não de classe) no Tailwind 4, e o padrão se perdia. `className` serve só para cor, margem e rotação.
+
+## Átomos do MVP
+
+- **`Button` / `ButtonLink`** (`ui/button.tsx`): variantes `primario`, `secundario`, `terciario`; props `fullWidth` e `grande` (ver "Botão"). Desabilitado usa `bg-mint-wash text-text-muted`.
+- **`Card`** (`ui/card.tsx`): receita de "Cartão"; `as` troca o elemento (`section`, `li`, `Link`) e repassa `id`, `href`, `aria-*`.
+- **`Chip`** (`ui/chip.tsx`): `tom` `ok | aviso | erro | neutro`, `icone` opcional; sempre com texto.
+- **`EmptyState`** (`ui/empty-state.tsx`): ícone, título, frase e ação opcional.
+- **`Campo`** (`ui/campo.tsx`): rótulo visível, `type` texto ou data, multilinha, erro com ícone ligado por `aria-describedby`. Recebe um `id` que deve vir de `useId()`.
+- **`AvisoExemplo`** (`ui/aviso-exemplo.tsx`): faixa "Protótipo com dados de exemplo" no topo de toda tela.
+
+## Stepper (`ui/stepper.tsx`)
+
+Controle de quantidade: `role="group"` rotulado, botão Diminuir, valor com unidade em região `aria-live="polite"`, botão Aumentar. Alvos de 44px. No mínimo o Diminuir usa `aria-disabled` (e não `disabled`) para **manter o foco**; o clique é ignorado. Props: `rotulo`, `valor`, `unidade`, `onChange`, `passo` (padrão 1), `min`. O rótulo vem de `useId()`.
+
+## Cabeçalho do app e seletor de perfil (`shell/`)
+
+- **`AppShell`**: cabeçalho fixo (logo que leva a `/`, `PerfilMenu`, `ReiniciarDados`), `AvisoExemplo`, `<main id="conteudo-<perfil>" tabIndex={-1}>` com skip link, e a navegação do perfil. O `id` por perfil existe porque, com `cacheComponents`, mais de um layout pode estar montado ao mesmo tempo.
+- **`PerfilMenu`**: `<details>`/`<summary>` com o perfil atual e a lista "Trocar de perfil" (links para a raiz de cada perfil, `aria-current="page"` no atual). Fecha com Esc (devolvendo o foco ao `summary`), clique fora, escolha de um item e mudança de rota. O perfil ativo vem da URL.
+- **`ReiniciarDados`**: botão que abre uma confirmação ("Apagar o que você fez no protótipo e voltar aos dados de exemplo?") com Cancelar e Reiniciar; Esc fecha. O foco entra em Cancelar ao abrir.
+
+## Navegação inferior (`shell/bottom-nav.tsx`) e barra lateral (`shell/side-nav.tsx`)
+
+- **Inferior**: `<nav aria-label="Principal">` fixa na base, coluna `max-w-md`, um item por rota do perfil (`NAV` em `src/lib/nav.ts`: 2 a 4 itens). Cada item tem ícone + rótulo completo (`text-xs leading-tight`, sem truncar; "Recompensas" cabe em 360px com 4 itens), altura mínima de 64px, `aria-current="page"` e faixa superior de 3px no ativo (não só cor). A raiz do perfil só fica ativa na rota exata (`itemAtivo`). Respeita a área segura do aparelho.
+- **Lateral**: só a Prefeitura, a partir de `lg` (nela, a inferior some a partir de `lg`). `<nav aria-label="Painel">`, 240px, ativo com `bg-primary-strong text-white` (receita "Barra lateral do painel").
+
+## Mapa esquemático (`mapa/mapa-quixada.tsx`)
+
+SVG inline de Quixadá (400 × 300 unidades; 1 unidade = 10 m), com os cinco bairros de `MAPA` em `src/data/seed.ts`. Dados de exemplo; legenda fixa "Mapa esquemático, não representa o trajeto real". Substitui, no MVP, a receita "Pino do mapa" (D-03 aberto).
+
+- Props: `pedidos`, `selecionados`, `rota` (`origem` + `ordem` de ids), `onSelecionar` e `rotulo` (vira `role="img"` + `aria-label` + `<title>`).
+- Pino: hexágono `primary-strong` (raio 13; 17 e com ícone de check se selecionado, contorno branco e sombra) com a folha. Pinos que se sobreporiam são afastados em torno do ponto real. Na rota, cada pino ganha um selo `tech-blue` com o número da parada e uma linha liga a origem do catador (círculo `tech-blue` com casa e o texto "Origem") às paradas em ordem.
+- Acessibilidade: o SVG é só imagem. A seleção acontece pela **lista** (a alternativa acessível); sobre cada pino há um `<button>` transparente de 44px com `aria-label` ("Pedido em <endereço>, <bairro>, parada N da rota, selecionado"), então o mapa nunca é o único caminho e o toque tem o alvo mínimo.
+- Cores só por token (`fill-mint-wash`, `stroke-border-soft`, `fill-tech-blue`, `fill-graphite`...); texto do mapa em unidades do viewBox.
+
+## Parada de rota (`catador/rota.tsx`)
+
+Item de `<ol>` dentro de um `Card`: círculo `tech-blue` com o número (decorativo; o `h3` traz "Parada N:" em `sr-only`), endereço como título, bairro e solicitante, itens, janela de retirada, chip "cerca de N pts" (estimativa) e, só na primeira, chip "Próxima parada" e o botão "Coletado" (com `aria-label` que diz qual parada). As demais mostram "Depois da parada N". Ao coletar, a região viva da tela anuncia "+N pts para <solicitante>", a origem passa a ser a parada coletada e a rota das restantes é recalculada a partir dela.
+
+## Regras de implementação que o MVP aprendeu
+
+- Telas continuam montadas (escondidas) ao navegar, por causa de `cacheComponents`. Use `useId()` para todo `id`, `aria-labelledby`, `aria-describedby`, `htmlFor`; nunca ids estáticos. Regiões vivas (`role="status"`) ficam sempre montadas e só o texto muda. Ver `workflow.md` §2.

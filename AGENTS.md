@@ -37,10 +37,11 @@ Referência visual aprovada: `docs/brand/identity-board.png`. Logotipos e ícone
 npm run dev          # desenvolvimento (next dev)
 npm run lint         # eslint
 npx tsc --noEmit     # checagem de tipos
+npm test             # node --test em src/lib (reducer, rota, formatação)
 npm run build        # build de produção (valida cacheComponents)
 ```
 
-Não há script de testes ainda (decisão D-15).
+Só há testes unitários de `src/lib` (`node --test`, sem dependência nova); testes de interface e e2e seguem em aberto (decisão D-15).
 
 ## Pegadinhas do Next 16 neste repositório
 

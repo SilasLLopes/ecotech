@@ -32,6 +32,14 @@ Confirmados no repositório e nos docs empacotados do Next 16.4.6:
 - Tailwind 4 pelo `@tailwindcss/turbopack` com CSS em `src/app/globals.css` (tokens via `@theme`, **sem** `tailwind.config.js`).
 - Fonte: trocar Geist por **Inter** com `next/font/google` em `src/app/layout.tsx`, expondo `--font-inter` (ver `DESIGN.md` > Implementation). `lang` do `<html>` deve ser `pt-BR`.
 - O template ainda tem placeholders (`page.tsx`, SVGs do Next/Vercel em `public/`, `favicon.ico` padrão, metadata "Create Next App"). Substituir por marca EcoTech quando a primeira tela for feita.
+- **Com `cacheComponents`, rotas anteriores continuam montadas e escondidas** (`Activity`): navegar de uma tela para outra não desmonta a anterior. Consequências que já custaram bugs reais neste projeto:
+  - (a) **Nunca** use `id`, `aria-labelledby`, `aria-describedby`, `aria-controls` ou `htmlFor` estáticos: duas telas montadas gerariam ids duplicados e referências quebradas. Use `useId()` por instância (e ids por perfil para o alvo do skip link, ex.: `conteudo-<perfil>`).
+  - (b) Estado transitório (mensagens, erros, valores de formulário, travas) precisa ser **zerado na limpeza do efeito** (`useEffect(() => () => reset(), [])`), senão reaparece quando a tela volta a ser mostrada.
+  - Região viva (`role="status"`, `aria-live`) fica sempre montada; só o texto entra e sai, senão leitor de tela não anuncia.
+- **`Icon` recebe `tamanho` (`sm | md | lg | xl`), não `size-*` em `className`.** Antes, passar `className` trocava a classe padrão e o ícone podia perder o tamanho (SVG sem tamanho estoura a largura em 360px); duas `size-*` no mesmo elemento brigam por ordem de CSS, não de classe. Corrigido: o tamanho é uma prop.
+- **Render determinístico:** não chame `Date.now()`, `new Date()` ou `Math.random()` durante a renderização (quebra `cacheComponents`); só em handlers de evento. Horários de exemplo são strings fixas no seed.
+- **Módulos de `src/lib/*.ts` testados com `node --test`** só usam sintaxe apagável (sem `enum`, sem parameter properties) e só `import type` entre si (sem alias `@/`, sem extensão `.ts` em imports de valor).
+- O fundo do app vem da variável `--background` (não de utilitário `bg-*`): ver `DESIGN.md` > Implementation.
 - `next dev` reescreve o bloco `nextjs-agent-rules` do `AGENTS.md`. Não edite entre os marcadores `BEGIN`/`END`.
 
 ## 3. Estrutura de pastas (proposta; confirme ao criar a primeira feature)
@@ -73,6 +81,7 @@ Regras: um componente por arquivo, nome em `kebab-case.tsx`, export nomeado em P
 **Qualquer código**
 - [ ] `npm run lint` sem erros
 - [ ] `npx tsc --noEmit` sem erros
+- [ ] `npm test` passa (módulos de `src/lib`)
 - [ ] `npm run build` passa (importante com `cacheComponents`)
 - [ ] Nada de `console.log`, código morto ou TODO sem dono
 - [ ] Docs atualizados se mudou comportamento, token ou decisão
