@@ -166,7 +166,7 @@ export function PedidosProximos() {
                           marcado ? "bg-primary-strong text-white" : "bg-white"
                         }`}
                       >
-                        {marcado && <Icon nome="check" className="size-4" />}
+                        {marcado && <Icon nome="check" tamanho="sm" />}
                       </span>
                       <span className="flex min-w-0 flex-col gap-1">
                         <span id={`${uid}-bai-${pedido.id}`} className="text-sm text-text-muted">
@@ -212,7 +212,7 @@ export function PedidosProximos() {
         <div role="status">
           {aviso && (
             <p className="pointer-events-auto mx-3 mb-2 flex items-start gap-2 rounded-lg border border-warning bg-white p-3 text-sm font-semibold text-graphite shadow-raised">
-              <Icon nome="megafone" className="mt-0.5 size-5 text-warning" />
+              <Icon nome="megafone" className="mt-0.5 text-warning" />
               {aviso}
             </p>
           )}

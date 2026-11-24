@@ -74,7 +74,7 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
       <div className="flex flex-col gap-6">
         <Card as="section" aria-labelledby={`${uid}-confirmacao`} className="flex flex-col gap-4">
           <span className="inline-flex size-12 items-center justify-center rounded-full bg-mint-wash text-primary-strong">
-            <Icon nome="check" className="size-7" />
+            <Icon nome="check" tamanho="xl" />
           </span>
           <h1
             id={`${uid}-confirmacao`}
@@ -186,7 +186,7 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
           Endereço da retirada
         </h2>
         <p className="flex items-start gap-2 text-base text-graphite">
-          <Icon nome="pino" className="mt-0.5 size-5 text-primary-strong" />
+          <Icon nome="pino" className="mt-0.5 text-primary-strong" />
           <span>
             {solicitante.endereco}
             <br />
@@ -223,7 +223,7 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
                     onChange={() => setJanela(j)}
                     className="sr-only"
                   />
-                  {marcada && <Icon nome="check" className="size-4" />}
+                  {marcada && <Icon nome="check" tamanho="sm" />}
                   {j}
                 </label>
               );

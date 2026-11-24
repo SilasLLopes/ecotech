@@ -188,7 +188,7 @@ export function Rodizio() {
             {passos >= MAX_PASSOS && " Este é o limite."}
           </p>
           <p className="flex items-start gap-2 rounded-lg bg-mint-wash p-3 text-base text-graphite">
-            <Icon nome="megafone" className="mt-0.5 size-5 text-primary-strong" />
+            <Icon nome="megafone" className="mt-0.5 text-primary-strong" />
             A diferença é pequena de propósito, para não estimular consumo exagerado
           </p>
         </div>
@@ -224,7 +224,7 @@ export function Rodizio() {
             tabIndex={-1}
             className="flex scroll-mt-20 items-start gap-2 rounded-lg bg-mint-wash p-4 text-base font-semibold text-primary-strong focus:outline-3 focus:outline-offset-2 focus:outline-tech-blue"
           >
-            <Icon nome="check" className="mt-0.5 size-5" />
+            <Icon nome="check" className="mt-0.5" />
             {confirmacao.texto}
           </p>
         )}

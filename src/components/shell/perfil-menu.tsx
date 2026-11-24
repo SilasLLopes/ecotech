@@ -46,12 +46,13 @@ export function PerfilMenu({ perfil }: { perfil: Perfil }) {
       <summary
         className={`flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-md border-[1.5px] border-border-soft bg-white px-3 text-sm font-semibold text-graphite hover:bg-mint-wash [&::-webkit-details-marker]:hidden ${FOCO}`}
       >
-        <Icon nome={PERFIS[perfil].icone} className="size-4 text-primary-strong" />
+        <Icon nome={PERFIS[perfil].icone} tamanho="sm" className="text-primary-strong" />
         <span className="sr-only">Perfil: </span>
         {PERFIS[perfil].rotulo}
         <Icon
           nome="chevron"
-          className="size-4 transition-transform motion-reduce:transition-none group-open:rotate-180"
+          tamanho="sm"
+          className="transition-transform motion-reduce:transition-none group-open:rotate-180"
         />
       </summary>
       <div className="absolute right-4 top-full z-50 mt-1 w-64 max-w-full rounded-lg border border-border-soft bg-white p-2 shadow-raised">
@@ -75,9 +76,9 @@ export function PerfilMenu({ perfil }: { perfil: Perfil }) {
                       : "text-graphite hover:bg-mint-wash"
                   }`}
                 >
-                  <Icon nome={PERFIS[p].icone} className="size-5" />
+                  <Icon nome={PERFIS[p].icone} />
                   <span className="flex-1">{PERFIS[p].rotulo}</span>
-                  {atual && <Icon nome="check" className="size-4" />}
+                  {atual && <Icon nome="check" tamanho="sm" />}
                 </Link>
               </li>
             );

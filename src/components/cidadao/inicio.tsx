@@ -163,7 +163,7 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
                     }`}
                   >
                     {estadoEtapa === "feita" ? (
-                      <Icon nome="check" className="size-4" />
+                      <Icon nome="check" tamanho="sm" />
                     ) : (
                       i + 1
                     )}
@@ -290,7 +290,7 @@ function MetaLinha({ meta }: { meta: Meta }) {
       <p className="text-sm text-text-muted">
         {meta.concluida ? (
           <span className="inline-flex items-center gap-1 font-semibold text-primary-strong">
-            <Icon nome="check" className="size-4" />
+            <Icon nome="check" tamanho="sm" />
             Concluída: bônus de {numero(meta.bonus)} pts recebido
           </span>
         ) : (

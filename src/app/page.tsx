@@ -32,13 +32,13 @@ export default function Home() {
                   className="flex h-full min-h-11 items-center gap-4 p-5 transition hover:-translate-y-0.5 hover:shadow-raised motion-reduce:transform-none motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tech-blue"
                 >
                   <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-mint-wash text-primary-strong">
-                    <Icon nome={PERFIS[p].icone} className="size-6" />
+                    <Icon nome={PERFIS[p].icone} tamanho="lg" />
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col gap-1">
                     <span className="text-xl font-semibold">{PERFIS[p].rotulo}</span>
                     <span className="text-text-muted">{PERFIS[p].frase}</span>
                   </span>
-                  <Icon nome="seta" className="size-5 text-primary-strong" />
+                  <Icon nome="seta" className="text-primary-strong" />
                 </Card>
               </li>
             ))}

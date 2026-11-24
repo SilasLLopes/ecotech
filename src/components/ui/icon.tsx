@@ -116,12 +116,22 @@ const TRACADOS: Record<IconeNome, ReactNode> = {
   chevron: <path d="m7 10 5 5 5-5" />,
 };
 
+// O tamanho vem de uma prop (e não de className) para que a classe padrão nunca se perca
+// nem dispute ordem de CSS com outra `size-*`. className serve só para cor, margem e rotação.
+const TAMANHOS = {
+  sm: "size-4",
+  md: "size-5",
+  lg: "size-6",
+  xl: "size-7",
+} as const;
+
 type IconProps = {
   nome: IconeNome;
+  tamanho?: keyof typeof TAMANHOS;
   className?: string;
 };
 
-export function Icon({ nome, className = "size-5" }: IconProps) {
+export function Icon({ nome, tamanho = "md", className = "" }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -132,7 +142,7 @@ export function Icon({ nome, className = "size-5" }: IconProps) {
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      className={`shrink-0 ${className}`}
+      className={`shrink-0 ${TAMANHOS[tamanho]} ${className}`.trim()}
     >
       {TRACADOS[nome]}
     </svg>

@@ -21,7 +21,7 @@ export function Chip({ tom, icone, children }: ChipProps) {
     <span
       className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold ${TONS[tom]}`}
     >
-      {icone ? <Icon nome={icone} className="size-4" /> : null}
+      {icone ? <Icon nome={icone} tamanho="sm" /> : null}
       {children}
     </span>
   );

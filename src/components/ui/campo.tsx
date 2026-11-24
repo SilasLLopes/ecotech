@@ -72,7 +72,7 @@ export function Campo({
       )}
       {erro && (
         <p id={idErro} className="flex items-start gap-1 text-sm font-semibold text-danger">
-          <Icon nome="x" className="mt-0.5 size-4" />
+          <Icon nome="x" tamanho="sm" className="mt-0.5" />
           {erro}
         </p>
       )}

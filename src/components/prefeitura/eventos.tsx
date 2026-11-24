@@ -202,7 +202,7 @@ export function Eventos() {
           tabIndex={aviso.foco === "aviso" ? -1 : undefined}
           className="flex scroll-mt-20 items-start gap-2 rounded-lg bg-mint-wash p-4 text-base font-semibold text-primary-strong focus:outline-3 focus:outline-offset-2 focus:outline-tech-blue"
         >
-          <Icon nome="check" className="mt-0.5 size-5" />
+          <Icon nome="check" className="mt-0.5" />
           {aviso.texto}
         </p>
       )}
@@ -234,7 +234,7 @@ export function Eventos() {
                     <Card as="article" className="flex flex-col gap-3">
                       <div>
                         <p className="flex items-center gap-2 text-sm font-semibold text-primary-strong">
-                          <Icon nome="calendario" className="size-4" />
+                          <Icon nome="calendario" tamanho="sm" />
                           {dataBR(ev.data)}
                         </p>
                         <h3 className="text-lg font-semibold text-graphite">{ev.titulo}</h3>

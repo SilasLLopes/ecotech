@@ -234,7 +234,7 @@ export function Painel() {
             <GraficoColetas />
             <details className="group">
               <summary className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md text-sm font-semibold text-primary-strong focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tech-blue">
-                <Icon nome="chevron" className="size-4 -rotate-90 group-open:rotate-0" />
+                <Icon nome="chevron" tamanho="sm" className="-rotate-90 group-open:rotate-0" />
                 Ver os valores em tabela
               </summary>
               <div className="mt-3">
@@ -252,7 +252,7 @@ export function Painel() {
 
         <Secao id={`${uid}-catadores`} titulo="Catadores associados">
           <p className="flex items-start gap-2 rounded-lg bg-mint-wash p-3 text-sm text-graphite">
-            <Icon nome="pessoas" className="mt-0.5 size-4 text-primary-strong" />
+            <Icon nome="pessoas" tamanho="sm" className="mt-0.5 text-primary-strong" />
             Só catadores associados pela Prefeitura acessam o app.
           </p>
           {estado.catadores.length === 0 ? (
