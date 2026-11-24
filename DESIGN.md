@@ -239,7 +239,7 @@ Curto, útil e suave: 150 a 250ms, `cubic-bezier(0.2, 0.7, 0.2, 1)`; entrada de 
 
 ## Implementation (Tailwind 4)
 
-Tokens prontos para `src/app/globals.css` (substituem o bloco `@theme inline` com Geist do template). Esta é a **fonte única** dos tokens no código; não duplique valores em componentes.
+Tokens prontos para `src/app/globals.css` (já aplicados em `globals.css`). Esta é a **fonte única** dos tokens no código; não duplique valores em componentes.
 
 ```css
 @import "tailwindcss";
@@ -292,6 +292,6 @@ body {
 
 O fundo do app vem da variável `--background` (que aponta para `mint-surface`) porque uma regra `body { background }` fora de camada vence qualquer utilitário do Tailwind; por isso `bg-*` no `body` ou no `<html>` não funciona. Para trocar o fundo, mude a variável.
 
-Uso: `bg-primary-strong text-white`, `text-graphite`, `bg-mint-surface`, `bg-reward` (cartão de recompensa), `rounded-lg shadow-card`. Este arquivo de documentação não altera o código; o primeiro agente que implementar o design system deve aplicar o bloco e trocar `Geist` por `Inter` em `src/app/layout.tsx`.
+Uso: `bg-primary-strong text-white`, `text-graphite`, `bg-mint-surface`, `bg-reward` (cartão de recompensa), `rounded-lg shadow-card`. O bloco já está em `src/app/globals.css` e a fonte Inter já está em `src/app/layout.tsx`; ao mudar um token, atualize os dois lugares no mesmo commit.
 
 Modo escuro do produto: **[ABERTO]** (D-06). Até decisão, somente tema claro: remover o `@media (prefers-color-scheme: dark)` do template ao aplicar os tokens.

@@ -104,7 +104,7 @@ Navegação inferior: Início · Coletar · Recompensas. Usuária de exemplo: An
 
 | Rota | O que mostra | Estados |
 |---|---|---|
-| `/cidadao` | Saudação, cartão de saldo (`bg-reward`), botão grande "Tenho material para ser reciclado", "Item da semana" (material em destaque e o acréscimo, com a nota de que a diferença é pequena de propósito), "Suas metas" (diária e mensal), "Sua coleta", últimas atividades do extrato | Coleta: vazia ("Nenhuma coleta em andamento") ou com acompanhamento em etapas (pedido enviado, aceito pelo catador, coletado); "Cancelar pedido" só enquanto aguarda. Extrato vazio. Cadastro de exemplo não encontrado (após limpar dados) com orientação de reiniciar |
+| `/cidadao` | Saudação, cartão de saldo (`bg-reward`), botão grande "Tenho material para ser reciclado", "Item da semana" (material em destaque e o acréscimo, com a nota de que a diferença é pequena de propósito), "Suas metas" (diária e mensal), "Suas coletas", últimas atividades do extrato | Coletas: vazia ("Nenhuma coleta em andamento") ou uma lista com **todos** os pedidos ativos (o mais recente primeiro), cada um com suas etapas (aguardando catador, aceito pelo catador); pedido coletado sai da lista e aparece em "Últimas atividades". "Cancelar pedido" em cada pedido, só enquanto aguarda, com aviso numa região viva (foco vai para o aviso). Extrato vazio. Cadastro de exemplo não encontrado (após limpar dados) com orientação de reiniciar |
 | `/cidadao/coletar` | Lista de materiais com `Stepper` (kg, L ou un), selo "Em destaque", endereço de exemplo, janela de retirada (Manhã, Tarde, Noite), estimativa de pontos ao vivo e "Pedir coleta" | Botão desabilitado e explicado enquanto nada foi marcado (`aria-describedby`). Após enviar: "Pedido enviado!" com resumo, "Acompanhar na tela inicial" e "Fazer outro pedido" |
 | `/cidadao/recompensas` | Cartão de saldo, lista de benefícios ativos com custo e "Resgatar", cupons resgatados com código | Saldo insuficiente ("Faltam N pts. Cada coleta aproxima você.") ou esgotado (chip "Esgotado"): botão desabilitado com o motivo ligado por `aria-describedby`; resgate com confirmação numa região viva e trava curta contra duplo toque; sem benefícios; sem cupons |
 
@@ -136,7 +136,11 @@ Painel largo; navegação em barra lateral (`lg`) ou inferior (menor). Itens: Pa
 | `/prefeitura/beneficios` | Lista de benefícios (ativar e desativar) e formulário "Criar benefício" (comércio, benefício, custo, estoque) | Todos os campos obrigatórios, erros por campo com foco no primeiro; sem benefícios; confirmação numa região viva |
 | `/prefeitura/eventos` | Anúncios em análise com "Aprovar" e "Recusar", lista de eventos e formulário "Criar evento" (título, data, local, descrição) | Erros por campo; sem eventos; confirmação numa região viva |
 
-Limitações conhecidas do protótipo estão em [`decisions.md`](../process/decisions.md) (seção "Limitações do protótipo").
+### Página não encontrada (`src/app/not-found.tsx`)
+
+Qualquer endereço sem rota mostra: logo (link para `/`), cartão com ícone de pino, título "Página não encontrada", uma frase sem culpa e o botão "Voltar ao início". Título da aba: "Página não encontrada | EcoTech".
+
+Limitações conhecidas do protótipo estão em [`decisions.md`](../process/decisions.md) (seção "Limitações conhecidas do protótipo").
 
 ## Checklist antes de dar uma tela como pronta
 

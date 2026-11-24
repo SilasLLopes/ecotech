@@ -27,14 +27,14 @@ Confirmados no repositório e nos docs empacotados do Next 16.4.6:
 
 - **App Router em `src/app/`**; alias `@/*` → `./src/*`.
 - `next.config.ts` liga **`cacheComponents`** e **`partialPrefetching`**. Dados dinâmicos precisam do tratamento descrito em `01-getting-started/08-caching.md` (`"use cache"`, `Suspense`). Não use o modelo antigo de cache sem ler esse guia.
-- O arquivo `middleware` foi **renomeado para `proxy`** (`src/proxy.ts`). Não crie `middleware.ts`.
+- O arquivo `middleware` foi **renomeado para `proxy`**: se um dia for preciso, a convenção é `src/proxy.ts` (hoje não existe nenhum). Não crie `middleware.ts`.
 - Helpers de tipo globais `PageProps<'/rota'>` e `LayoutProps<'/rota'>` (já usados em `layout.tsx`); não precisam de import.
 - Tailwind 4 pelo `@tailwindcss/turbopack` com CSS em `src/app/globals.css` (tokens via `@theme`, **sem** `tailwind.config.js`).
-- Fonte: trocar Geist por **Inter** com `next/font/google` em `src/app/layout.tsx`, expondo `--font-inter` (ver `DESIGN.md` > Implementation). `lang` do `<html>` deve ser `pt-BR`.
-- O template ainda tem placeholders (`page.tsx`, SVGs do Next/Vercel em `public/`, `favicon.ico` padrão, metadata "Create Next App"). Substituir por marca EcoTech quando a primeira tela for feita.
+- Fonte: **Inter** via `next/font/google` em `src/app/layout.tsx`, expondo `--font-inter` (ver `DESIGN.md` > Implementation). `lang` do `<html>` é `pt-BR`.
+- Os placeholders do template já foram trocados pela marca EcoTech: `src/app/page.tsx` é a entrada, `public/` só tem `brand/`, o favicon é `src/app/icon.svg` e a metadata é a do EcoTech. Há `src/app/not-found.tsx` em pt-BR.
 - **Com `cacheComponents`, rotas anteriores continuam montadas e escondidas** (`Activity`): navegar de uma tela para outra não desmonta a anterior. Consequências que já custaram bugs reais neste projeto:
   - (a) **Nunca** use `id`, `aria-labelledby`, `aria-describedby`, `aria-controls` ou `htmlFor` estáticos: duas telas montadas gerariam ids duplicados e referências quebradas. Use `useId()` por instância (e ids por perfil para o alvo do skip link, ex.: `conteudo-<perfil>`).
-  - (b) Estado transitório (mensagens, erros, valores de formulário, travas) precisa ser **zerado na limpeza do efeito** (`useEffect(() => () => reset(), [])`), senão reaparece quando a tela volta a ser mostrada.
+  - (b) Estado transitório (mensagens, erros, valores de formulário, travas) precisa ser **zerado na limpeza do efeito** (`useLayoutEffect(() => () => reset(), [])`, como em `preserving-ui-state.md`; zere também refs e travas, não só `useState`), senão reaparece quando a tela volta a ser mostrada.
   - Região viva (`role="status"`, `aria-live`) fica sempre montada; só o texto entra e sai, senão leitor de tela não anuncia.
 - **`Icon` recebe `tamanho` (`sm | md | lg | xl`), não `size-*` em `className`.** Antes, passar `className` trocava a classe padrão e o ícone podia perder o tamanho (SVG sem tamanho estoura a largura em 360px); duas `size-*` no mesmo elemento brigam por ordem de CSS, não de classe. Corrigido: o tamanho é uma prop.
 - **Render determinístico:** não chame `Date.now()`, `new Date()` ou `Math.random()` durante a renderização (quebra `cacheComponents`); só em handlers de evento. Horários de exemplo são strings fixas no seed.

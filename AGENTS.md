@@ -37,7 +37,7 @@ Referência visual aprovada: `docs/brand/identity-board.png`. Logotipos e ícone
 npm run dev          # desenvolvimento (next dev)
 npm run lint         # eslint
 npx tsc --noEmit     # checagem de tipos
-npm test             # node --test em src/lib (reducer, rota, formatação)
+npm test             # node --test em src/lib (reducer, rota, formatação, invariantes do seed)
 npm run build        # build de produção (valida cacheComponents)
 ```
 

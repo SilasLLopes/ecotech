@@ -27,7 +27,7 @@ Não são bugs a corrigir antes do produto real; ficam registradas para não ser
 | Item | Situação no MVP |
 |---|---|
 | Eventos | O modelo de dados não tem estado "encerrado": **todos os eventos do seed contam como abertos** para patrocínio. Datas são de exemplo |
-| Rota após recarregar | A ordem da rota é recalculada a partir da origem do catador. Depois de recarregar `/catador/rota`, a posição "atual" (última parada coletada) se perde e a rota recomeça da origem do catador |
+| Rota após recarregar ou sair da tela | A ordem da rota é recalculada a partir da origem do catador. Depois de recarregar `/catador/rota` ou de navegar para outra tela e voltar, a posição "atual" (última parada coletada) se perde e a rota recomeça da origem do catador |
 | Usuários fixos | Um cidadão (Ana), um comerciante (Mercadinho Bom Preço) e um catador (João) de exemplo. Não há cadastro. "Reiniciar dados de exemplo" volta ao seed; estado salvo antes de uma mudança do seed só atualiza ao reiniciar |
 | Pontos | Todos os valores, metas, bônus e o multiplicador (de ×1,00 a ×1,50, passo 0,05) são de exemplo (D-04 segue aberto) |
 | Texto da entrada do comerciante | A frase "Marque o material do comércio e ofereça benefícios" foi escrita pela implementação e **precisa de confirmação do responsável do projeto** |
@@ -53,7 +53,7 @@ Marcados com a **opção recomendada** (a menos custosa de reverter) para aceler
 | D-12 | Vetores oficiais da logo (designer) | Substituir `public/brand/*` mantendo nomes | Marca |
 | D-13 | PWA ou app nativo | Web responsivo; PWA depois, guia em `01-app/02-guides/progressive-web-apps.md` | Ícones PNG, offline |
 | D-14 | LGPD: base legal, consentimento de localização, retenção, DPO | Pedir consentimento granular; dados mínimos | Mapa, cadastro |
-| D-15 | Testes (unitário/e2e) e CI. *Nota: o MVP roda `npm test` com `node --test` só em `src/lib` (reducer, rota, formatação), sem dependência nova; interface e e2e seguem abertos* | Vitest + Playwright; CI com lint, tipos e build | Definição de pronto |
+| D-15 | Testes (unitário/e2e) e CI. *Nota: o MVP roda `npm test` com `node --test` só em `src/lib` (reducer, rota, formatação e invariantes do seed), sem dependência nova; interface e e2e seguem abertos* | Vitest + Playwright; CI com lint, tipos e build | Definição de pronto |
 | D-16 | Hospedagem/deploy | Aberto; guias em `01-app/02-guides/deploying-to-platforms.md` | Release |
 | D-17 | Como a Prefeitura associa um catador (convite, cadastro interno, lista) e o que o catador vê antes de ser associado | Convite emitido pela Prefeitura | Login do catador real |
 | D-18 | Rodízio semanal: quem escolhe o item (manual ou calendário), limite de variação de valor, histórico visível ao cidadão | Prefeitura escolhe em painel; limite configurável; cidadão vê "item da semana" | Painel, regras reais |

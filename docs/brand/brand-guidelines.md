@@ -65,7 +65,7 @@ Todos em `public/brand/`, servidos em `/brand/<arquivo>`.
 
 ```tsx
 import Image from "next/image";
-<Image src="/brand/logo-horizontal.svg" alt="EcoTech" width={160} height={48} priority />
+<Image src="/brand/logo-horizontal.svg" alt="EcoTech" width={160} height={48} loading="eager" />
 ```
 
 Use `alt="EcoTech"` quando o logotipo é o único nome visível; `alt=""` se o texto "EcoTech" já está ao lado. Para favicon e ícones, use as convenções de arquivo do App Router (`src/app/icon.svg`, `src/app/apple-icon.png`, `src/app/favicon.ico`); leia `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/01-metadata/app-icons.md` antes. O `favicon.ico` atual de `src/app/` é o padrão do template e deve ser substituído. Exportar PNG/ICO a partir dos SVG (ImageMagick):

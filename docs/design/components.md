@@ -19,9 +19,9 @@ Regras transversais, valem para **todo** componente interativo:
 | Secundário | `... border-[1.5px] border-primary-strong bg-white text-primary-strong hover:bg-mint-wash` |
 | Terciário (link-botão) | `text-primary-strong font-semibold underline-offset-4 hover:underline` |
 | Sobre fundo escuro | fundo `primary-soft`, texto `graphite` (10,4:1) ou botão branco com texto `primary-strong` |
-| Perigo | `bg-danger text-white` (6,6:1), só para ações destrutivas, com confirmação |
+| Perigo | `bg-danger text-white` (6,6:1), só para ações destrutivas, com confirmação. **Ainda não implementada** em `ui/button.tsx` (nenhuma tela do MVP usa); criar junto com a primeira ação destrutiva |
 
-Tamanho: o botão tem altura mínima de 44px (`min-h-11 text-sm`). A prop `grande` (`min-h-14 text-base`) é só para a ação principal da tela, como "Tenho material para ser reciclado"; no máximo um por tela.
+Tamanho: o botão tem altura mínima de 44px (`min-h-11 text-sm`; a receita da tabela escreve `h-11`, e no código vale `min-h-11` para o texto poder crescer sem estourar). A prop `grande` (`min-h-14 text-base`) é só para a ação principal da tela, como "Tenho material para ser reciclado"; no máximo um por tela.
 
 Estados: `disabled` → `bg-mint-wash text-text-muted cursor-not-allowed` (não usar opacidade sobre o verde). Carregando → spinner + texto "Entrando..." e `aria-busy`; botão não some nem muda de largura. Um primário por região; largura total no mobile em formulários.
 
@@ -64,7 +64,7 @@ Origem: board "Cabeçalho da Plataforma". `sticky top-0 z-40 h-16 border-b borde
 
 ## Banner (hero com fotografia)
 
-Origem: board "Juntos por uma cidade mais verde". `rounded-xl` (ou largura total), fotografia de cidade com árvores ao fundo, **overlay grafite** (≥55%) à esquerda para garantir contraste, título Display branco com última expressão em `primary-soft`, curva de folha `primary` cortando o canto direito. Texto nunca direto sobre áreas claras da foto. Imagem via `next/image` com `alt` descritivo (ou `alt=""` se decorativa), `priority` se acima da dobra.
+Origem: board "Juntos por uma cidade mais verde". `rounded-xl` (ou largura total), fotografia de cidade com árvores ao fundo, **overlay grafite** (≥55%) à esquerda para garantir contraste, título Display branco com última expressão em `primary-soft`, curva de folha `primary` cortando o canto direito. Texto nunca direto sobre áreas claras da foto. Imagem via `next/image` com `alt` descritivo (ou `alt=""` se decorativa), `loading="eager"` ou `fetchPriority="high"` se acima da dobra (`priority` é obsoleta no Next 16).
 
 ## Cartão de indicador (KPI) do painel
 
@@ -104,6 +104,7 @@ SVG inline próprio, grade 24×24, traço 1,75, pontas arredondadas, `currentCol
 - **`Chip`** (`ui/chip.tsx`): `tom` `ok | aviso | erro | neutro`, `icone` opcional; sempre com texto.
 - **`EmptyState`** (`ui/empty-state.tsx`): ícone, título, frase e ação opcional.
 - **`Campo`** (`ui/campo.tsx`): rótulo visível, `type` texto ou data, multilinha, erro com ícone ligado por `aria-describedby`. Recebe um `id` que deve vir de `useId()`.
+- **`Logo`** (`brand/logo.tsx`): `variante`, `fundo`, `altura` e `eager` (carrega já, sem esperar a rolagem; só no logo acima da dobra). Usa `next/image` com `loading="eager"`, não `priority` (obsoleta no Next 16).
 - **`AvisoExemplo`** (`ui/aviso-exemplo.tsx`): faixa "Protótipo com dados de exemplo" no topo de toda tela.
 
 ## Stepper (`ui/stepper.tsx`)
@@ -113,8 +114,8 @@ Controle de quantidade: `role="group"` rotulado, botão Diminuir, valor com unid
 ## Cabeçalho do app e seletor de perfil (`shell/`)
 
 - **`AppShell`**: cabeçalho fixo (logo que leva a `/`, `PerfilMenu`, `ReiniciarDados`), `AvisoExemplo`, `<main id="conteudo-<perfil>" tabIndex={-1}>` com skip link, e a navegação do perfil. O `id` por perfil existe porque, com `cacheComponents`, mais de um layout pode estar montado ao mesmo tempo.
-- **`PerfilMenu`**: `<details>`/`<summary>` com o perfil atual e a lista "Trocar de perfil" (links para a raiz de cada perfil, `aria-current="page"` no atual). Fecha com Esc (devolvendo o foco ao `summary`), clique fora, escolha de um item e mudança de rota. O perfil ativo vem da URL.
-- **`ReiniciarDados`**: botão que abre uma confirmação ("Apagar o que você fez no protótipo e voltar aos dados de exemplo?") com Cancelar e Reiniciar; Esc fecha. O foco entra em Cancelar ao abrir.
+- **`PerfilMenu`**: `<details>`/`<summary>` com o perfil atual e a lista "Trocar de perfil" (links para a raiz de cada perfil, `aria-current="page"` no atual). Fecha com Esc (devolvendo o foco ao `summary`), clique ou foco fora, escolha de um item e mudança de rota. O perfil ativo vem da URL.
+- **`ReiniciarDados`**: botão que abre uma confirmação ("Apagar o que você fez no protótipo e voltar aos dados de exemplo?") com Cancelar e Reiniciar; Esc, clique fora e foco fora fecham (assim o menu de perfil e a confirmação nunca ficam abertos juntos). O foco entra em Cancelar ao abrir.
 
 ## Navegação inferior (`shell/bottom-nav.tsx`) e barra lateral (`shell/side-nav.tsx`)
 
