@@ -37,7 +37,7 @@ export function Logo({
   variante,
   fundo = "claro",
   altura,
-  className = "h-auto max-w-full",
+  className,
   priority = false,
 }: LogoProps) {
   const { w, h } = PROPORCAO[variante];
@@ -48,7 +48,7 @@ export function Logo({
       alt="EcoTech"
       width={largura}
       height={altura}
-      className={className}
+      className={`h-auto max-w-full ${className ?? ""}`.trim()}
       priority={priority}
     />
   );

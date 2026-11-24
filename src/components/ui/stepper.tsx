@@ -13,7 +13,7 @@ type StepperProps = {
 };
 
 const BOTAO =
-  "inline-flex size-11 items-center justify-center rounded-md border-[1.5px] border-primary-strong bg-white text-primary-strong transition-colors duration-200 hover:bg-mint-wash motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tech-blue disabled:cursor-not-allowed disabled:border-transparent disabled:bg-mint-wash disabled:text-text-muted";
+  "inline-flex size-11 items-center justify-center rounded-md border-[1.5px] border-primary-strong bg-white text-primary-strong transition-colors duration-200 hover:bg-mint-wash motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tech-blue aria-disabled:cursor-not-allowed aria-disabled:border-transparent aria-disabled:bg-mint-wash aria-disabled:text-text-muted";
 
 export function Stepper({
   rotulo,
@@ -35,8 +35,11 @@ export function Stepper({
           type="button"
           className={BOTAO}
           aria-label={`Diminuir ${rotulo}`}
-          disabled={noMinimo}
-          onClick={() => onChange(Math.max(min, valor - passo))}
+          aria-disabled={noMinimo || undefined}
+          onClick={() => {
+            if (noMinimo) return;
+            onChange(Math.max(min, valor - passo));
+          }}
         >
           <Icon nome="menos" />
         </button>
