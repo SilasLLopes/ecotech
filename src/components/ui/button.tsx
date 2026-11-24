@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 
-export type VarianteBotao = "primario" | "secundario" | "terciario" | "perigo";
+export type VarianteBotao = "primario" | "secundario" | "terciario";
 
 const BASE =
   "inline-flex items-center justify-center gap-2 font-semibold transition-colors duration-200 motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tech-blue";
@@ -13,7 +13,6 @@ const VARIANTES: Record<VarianteBotao, string> = {
     "rounded-md border-[1.5px] border-primary-strong bg-white px-6 text-primary-strong hover:bg-mint-wash",
   terciario:
     "rounded-md px-2 text-primary-strong underline-offset-4 hover:underline",
-  perigo: "rounded-md bg-danger px-6 text-white hover:bg-danger/90",
 };
 
 const DESABILITADO =

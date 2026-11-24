@@ -9,7 +9,7 @@ type StepperProps = {
   unidade: string;
   onChange: (valor: number) => void;
   passo?: number;
-  min?: 0;
+  min?: number;
 };
 
 const BOTAO =

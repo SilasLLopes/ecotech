@@ -42,7 +42,7 @@ export function AppShell({
                 painel ? "lg:invisible" : ""
               }`}
             >
-              <Logo variante="horizontal" altura={32} priority />
+              <Logo variante="horizontal" altura={32} eager />
             </Link>
             <div className="flex items-center gap-1">
               <PerfilMenu perfil={perfil} />

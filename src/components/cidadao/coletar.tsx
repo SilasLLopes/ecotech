@@ -230,7 +230,7 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
                 >
                   <input
                     type="radio"
-                    name="janela"
+                    name={`${uid}-janela`}
                     value={j}
                     checked={marcada}
                     onChange={() => setJanela(j)}

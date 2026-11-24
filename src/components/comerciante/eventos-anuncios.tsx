@@ -17,7 +17,7 @@ import type { Anuncio } from "@/lib/types";
 
 type Valores = { titulo: string; oferta: string };
 type Erros = Partial<Record<keyof Valores, string>>;
-type Aviso = { texto: string; foco: boolean; icone: IconeNome };
+type Aviso = { texto: string; foco: boolean; ok: boolean };
 
 const VAZIO: Valores = { titulo: "", oferta: "" };
 const CAMPOS = ["titulo", "oferta"] as const;
@@ -104,7 +104,7 @@ export function EventosAnuncios() {
         setAviso({
           texto: `A Prefeitura ${a.status === "aprovado" ? "aprovou" : "recusou"} o anúncio ${a.titulo}.`,
           foco: false,
-          icone: a.status === "aprovado" ? "check" : "x",
+          ok: a.status === "aprovado",
         });
       }
     }
@@ -177,7 +177,7 @@ export function EventosAnuncios() {
     setAviso({
       texto: `Anúncio enviado para análise: ${anuncio.titulo}. A Prefeitura vai decidir.`,
       foco: true,
-      icone: "check",
+      ok: true,
     });
   }
 
@@ -203,9 +203,11 @@ export function EventosAnuncios() {
         <p
           ref={avisoRef}
           tabIndex={aviso.foco ? -1 : undefined}
-          className="flex scroll-mt-20 items-start gap-2 rounded-lg bg-mint-wash p-4 text-base font-semibold text-primary-strong focus:outline-3 focus:outline-offset-2 focus:outline-tech-blue"
+          className={`flex scroll-mt-20 items-start gap-2 rounded-lg p-4 text-base font-semibold focus:outline-3 focus:outline-offset-2 focus:outline-tech-blue ${
+            aviso.ok ? "bg-mint-wash text-primary-strong" : "bg-danger/10 text-danger"
+          }`}
         >
-          <Icon nome={aviso.icone} className="mt-0.5" />
+          <Icon nome={aviso.ok ? "check" : "x"} className="mt-0.5" />
           {aviso.texto}
         </p>
       )}

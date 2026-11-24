@@ -132,7 +132,7 @@ export function Rodizio() {
                 >
                   <input
                     type="radio"
-                    name="item-da-semana"
+                    name={`${uid}-item-da-semana`}
                     value={m.id}
                     checked={marcado}
                     onChange={() => escolherMaterial(m.id)}

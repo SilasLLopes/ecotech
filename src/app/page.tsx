@@ -14,7 +14,7 @@ export default function Home() {
       <AvisoExemplo />
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-4 py-10 lg:max-w-3xl">
         <header className="flex flex-col items-center gap-3 text-center">
-          <Logo variante="vertical" altura={140} priority />
+          <Logo variante="vertical" altura={140} eager />
           <p className="text-lg font-medium text-primary-strong">
             Pequenas atitudes. Grandes transformações.
           </p>

@@ -18,7 +18,7 @@ export function PerfilMenu({ perfil }: { perfil: Perfil }) {
     if (ref.current) ref.current.open = false;
   }, [pathname]);
 
-  // Esc e clique fora fecham o menu.
+  // Esc, clique e foco fora fecham o menu.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -28,16 +28,19 @@ export function PerfilMenu({ perfil }: { perfil: Perfil }) {
         el.querySelector("summary")?.focus();
       }
     }
-    function aoClicar(e: PointerEvent) {
+    // Clique ou foco fora fecham (assim abrir o "Reiniciar dados" fecha o menu).
+    function aoSairDeFora(e: Event) {
       if (el?.open && e.target instanceof Node && !el.contains(e.target)) {
         el.open = false;
       }
     }
     document.addEventListener("keydown", aoTeclar);
-    document.addEventListener("pointerdown", aoClicar);
+    document.addEventListener("pointerdown", aoSairDeFora);
+    document.addEventListener("focusin", aoSairDeFora);
     return () => {
       document.removeEventListener("keydown", aoTeclar);
-      document.removeEventListener("pointerdown", aoClicar);
+      document.removeEventListener("pointerdown", aoSairDeFora);
+      document.removeEventListener("focusin", aoSairDeFora);
     };
   }, []);
 

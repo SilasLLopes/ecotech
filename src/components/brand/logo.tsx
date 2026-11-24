@@ -9,8 +9,8 @@ type LogoProps = {
   /** Altura em px; a largura segue a proporção do viewBox do SVG. */
   altura: number;
   className?: string;
-  /** Carrega com prioridade (LCP). Use só no logo acima da dobra. */
-  priority?: boolean;
+  /** Carrega já, sem esperar a rolagem (`loading="eager"`). Use só no logo acima da dobra. */
+  eager?: boolean;
 };
 
 const PREFIXO: Record<Variante, string> = {
@@ -38,7 +38,7 @@ export function Logo({
   fundo = "claro",
   altura,
   className,
-  priority = false,
+  eager = false,
 }: LogoProps) {
   const { w, h } = PROPORCAO[variante];
   const largura = Math.round((altura * w) / h);
@@ -49,7 +49,7 @@ export function Logo({
       width={largura}
       height={altura}
       className={`h-auto max-w-full ${className ?? ""}`.trim()}
-      priority={priority}
+      loading={eager ? "eager" : undefined}
     />
   );
 }

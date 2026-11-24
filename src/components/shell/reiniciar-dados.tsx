@@ -13,6 +13,7 @@ export function ReiniciarDados({ comTextoNoDesktop }: { comTextoNoDesktop: boole
   const [aberto, setAberto] = useState(false);
   const gatilho = useRef<HTMLButtonElement>(null);
   const cancelar = useRef<HTMLButtonElement>(null);
+  const painel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!aberto) return;
@@ -23,8 +24,23 @@ export function ReiniciarDados({ comTextoNoDesktop }: { comTextoNoDesktop: boole
         gatilho.current?.focus();
       }
     }
+    // Clique fora fecha (inclusive ao abrir o menu de perfil, que também fecha
+    // ao clicar fora): os dois painéis do cabeçalho nunca ficam abertos juntos.
+    // O foco que vai para fora (Tab, ou abrir o menu de perfil pelo teclado)
+    // também fecha.
+    function aoSairDeFora(e: Event) {
+      if (!(e.target instanceof Node)) return;
+      if (painel.current?.contains(e.target) || gatilho.current?.contains(e.target)) return;
+      setAberto(false);
+    }
     document.addEventListener("keydown", aoTeclar);
-    return () => document.removeEventListener("keydown", aoTeclar);
+    document.addEventListener("pointerdown", aoSairDeFora);
+    document.addEventListener("focusin", aoSairDeFora);
+    return () => {
+      document.removeEventListener("keydown", aoTeclar);
+      document.removeEventListener("pointerdown", aoSairDeFora);
+      document.removeEventListener("focusin", aoSairDeFora);
+    };
   }, [aberto]);
 
   return (
@@ -45,6 +61,7 @@ export function ReiniciarDados({ comTextoNoDesktop }: { comTextoNoDesktop: boole
       </button>
       {aberto && (
         <div
+          ref={painel}
           id={`${uid}-confirmar-reinicio`}
           role="group"
           aria-labelledby={`${uid}-confirmar-reinicio-titulo`}
