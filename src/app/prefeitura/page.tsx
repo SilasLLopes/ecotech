@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
+import { Painel } from "@/components/prefeitura/painel";
 
-export const metadata: Metadata = { title: "Prefeitura" };
+export const metadata: Metadata = { title: "Painel da Prefeitura" };
 
 export default function Page() {
-  return (
-    <h1 className="text-2xl font-bold text-graphite">Painel da Prefeitura</h1>
-  );
+  return <Painel />;
 }
