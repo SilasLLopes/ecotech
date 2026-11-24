@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/icon";
 import { numero } from "@/lib/format";
 import { novoId, useDispatch, useEstado } from "@/lib/store";
 import type { Beneficio } from "@/lib/types";
-import { Campo, focarPrimeiroErro } from "./campo";
+import { Campo, focarPrimeiroErro } from "@/components/ui/campo";
 import { Tabela, type Coluna } from "./tabela";
 
 type Valores = { comercio: string; titulo: string; custo: string; estoque: string };

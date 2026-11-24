@@ -9,7 +9,7 @@ import { Icon, type IconeNome } from "@/components/ui/icon";
 import { dataBR, numero } from "@/lib/format";
 import { novoId, useDispatch, useEstado } from "@/lib/store";
 import type { Anuncio, Estado, Evento } from "@/lib/types";
-import { Campo, focarPrimeiroErro } from "./campo";
+import { Campo, focarPrimeiroErro } from "@/components/ui/campo";
 
 type Valores = { titulo: string; data: string; local: string; descricao: string };
 type Erros = Partial<Record<keyof Valores, string>>;
