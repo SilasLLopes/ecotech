@@ -268,12 +268,19 @@ Tokens prontos para `src/app/globals.css` (substituem o bloco `@theme inline` co
   --shadow-card: 0 1px 2px rgb(32 43 40 / 0.06), 0 8px 24px rgb(32 43 40 / 0.08);
   --shadow-raised: 0 12px 32px rgb(18 107 74 / 0.18);
 
+  /* Único degradê de superfície de destaque (Regra do Degradê Único): cartão de recompensa. Uso: bg-reward. */
+  --background-image-reward: linear-gradient(
+    135deg,
+    var(--color-primary-strong),
+    var(--color-graphite)
+  );
+
   --ease-eco: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #202b28;
+  --background: var(--color-mint-surface);
+  --foreground: var(--color-graphite);
 }
 
 body {
@@ -283,6 +290,8 @@ body {
 }
 ```
 
-Uso: `bg-primary-strong text-white`, `text-graphite`, `bg-mint-surface`, `rounded-lg shadow-card`. Este arquivo de documentação não altera o código; o primeiro agente que implementar o design system deve aplicar o bloco e trocar `Geist` por `Inter` em `src/app/layout.tsx`.
+O fundo do app vem da variável `--background` (que aponta para `mint-surface`) porque uma regra `body { background }` fora de camada vence qualquer utilitário do Tailwind; por isso `bg-*` no `body` ou no `<html>` não funciona. Para trocar o fundo, mude a variável.
+
+Uso: `bg-primary-strong text-white`, `text-graphite`, `bg-mint-surface`, `bg-reward` (cartão de recompensa), `rounded-lg shadow-card`. Este arquivo de documentação não altera o código; o primeiro agente que implementar o design system deve aplicar o bloco e trocar `Geist` por `Inter` em `src/app/layout.tsx`.
 
 Modo escuro do produto: **[ABERTO]** (D-06). Até decisão, somente tema claro: remover o `@media (prefers-color-scheme: dark)` do template ao aplicar os tokens.

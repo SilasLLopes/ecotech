@@ -21,6 +21,8 @@ Regras transversais, valem para **todo** componente interativo:
 | Sobre fundo escuro | fundo `primary-soft`, texto `graphite` (10,4:1) ou botão branco com texto `primary-strong` |
 | Perigo | `bg-danger text-white` (6,6:1), só para ações destrutivas, com confirmação |
 
+Tamanho: o botão tem altura mínima de 44px (`min-h-11 text-sm`). A prop `grande` (`min-h-14 text-base`) é só para a ação principal da tela, como "Tenho material para ser reciclado"; no máximo um por tela.
+
 Estados: `disabled` → `bg-mint-wash text-text-muted cursor-not-allowed` (não usar opacidade sobre o verde). Carregando → spinner + texto "Entrando..." e `aria-busy`; botão não some nem muda de largura. Um primário por região; largura total no mobile em formulários.
 
 > Adaptação (D-11): o board mostra botões verdes brilhantes (≈`primary`) com texto branco, que dão 3,24:1. Aqui o fundo é `primary-strong`. Se a equipe quiser o verde mais vivo, o texto deve ser grafite ou ≥24px/negrito.
