@@ -6,14 +6,13 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
-import { numero } from "@/lib/format";
+import { formatarEm, numero } from "@/lib/format";
 import { PERFIS } from "@/lib/nav";
 import { useDispatch, useEstado } from "@/lib/store";
 import type { Estado, Material, Meta, Pedido } from "@/lib/types";
 import {
   CartaoSaldo,
   descreverItens,
-  formatarEm,
   SemSolicitante,
   useSolicitante,
   type PerfilMovel,

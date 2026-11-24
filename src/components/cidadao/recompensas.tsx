@@ -6,11 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
-import { hora, numero } from "@/lib/format";
+import { formatarEm, hora, numero } from "@/lib/format";
 import { novoId, obterEstado, useDispatch, useEstado } from "@/lib/store";
 import {
   CartaoSaldo,
-  formatarEm,
   SemSolicitante,
   useSolicitante,
   type PerfilMovel,

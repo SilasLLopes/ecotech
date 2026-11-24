@@ -43,16 +43,6 @@ export function nomeDoSolicitante(estado: Estado, pedido: Pedido): string {
   );
 }
 
-const ISO = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}:\d{2}))?/;
-
-// O seed guarda horários em ISO; as ações da sessão guardam "Hoje, 14:32".
-// Lê a string, sem Date (seguro para renderização).
-export function formatarEm(em: string): string {
-  const m = ISO.exec(em);
-  if (!m) return em;
-  return m[4] ? `${m[3]}/${m[2]}, ${m[4]}` : `${m[3]}/${m[2]}`;
-}
-
 export function CartaoSaldo({
   saldo,
   comercio,

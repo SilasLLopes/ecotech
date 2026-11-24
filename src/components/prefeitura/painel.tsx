@@ -7,12 +7,11 @@ import { Chip, type TomChip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon, type IconeNome } from "@/components/ui/icon";
 import { COLETAS_POR_SEMANA } from "@/data/seed";
-import { dataBR, numero } from "@/lib/format";
+import { dataBR, formatarEm, numero } from "@/lib/format";
 import { useEstado } from "@/lib/store";
 import type { Estado, Pedido, StatusPedido } from "@/lib/types";
 import {
   descreverItens,
-  formatarEm,
   nomeDoSolicitante,
 } from "@/components/cidadao/compartilhado";
 import { Tabela, type Coluna } from "./tabela";

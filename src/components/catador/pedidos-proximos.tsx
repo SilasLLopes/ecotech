@@ -9,12 +9,11 @@ import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { pontosDoPedido } from "@/lib/coleta";
-import { numero } from "@/lib/format";
+import { formatarEm, numero } from "@/lib/format";
 import { distanciaM, ordenarRota } from "@/lib/route";
 import { obterEstado, useDispatch, useEstado } from "@/lib/store";
 import {
   descreverItens,
-  formatarEm,
   nomeDoSolicitante,
 } from "@/components/cidadao/compartilhado";
 import { resumoDaRota, SemCatador, useCatador } from "./compartilhado";
