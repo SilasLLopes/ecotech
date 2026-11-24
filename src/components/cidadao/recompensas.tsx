@@ -31,6 +31,7 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
   const [travado, setTravado] = useState(false);
   const [tentativa, setTentativa] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const confirmacao = useRef<HTMLParagraphElement>(null);
 
   useEffect(
     () => () => {
@@ -38,6 +39,16 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
     },
     [],
   );
+
+  // Depois de resgatar (ou de ser recusado), leva o foco e a tela até o aviso:
+  // com a grade em coluna única ele fica fora da área visível.
+  useEffect(() => {
+    if (!tentativa) return;
+    const el = confirmacao.current;
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ block: "center" });
+  }, [tentativa]);
 
   if (!solicitante) return <SemSolicitante />;
 
@@ -78,12 +89,20 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
 
       <CartaoSaldo saldo={solicitante.saldo} comercio={perfil === "comerciante"} />
 
+      {/* Região viva sempre montada: leitores de tela só anunciam texto que
+          entra depois de montada. */}
+      <div role="status" className="sr-only">
+        {mensagem}
+      </div>
       {mensagem && (
         <p
-          role="status"
-          className="flex items-center gap-2 rounded-lg bg-mint-wash p-4 text-base font-semibold text-primary-strong"
+          ref={confirmacao}
+          tabIndex={-1}
+          className={`flex scroll-mt-20 items-center gap-2 rounded-lg p-4 text-base font-semibold focus:outline-3 focus:outline-offset-2 focus:outline-tech-blue ${
+            feito ? "bg-mint-wash text-primary-strong" : "bg-danger/10 text-danger"
+          }`}
         >
-          <Icon nome="check" />
+          <Icon nome={feito ? "check" : "x"} />
           {mensagem}
         </p>
       )}

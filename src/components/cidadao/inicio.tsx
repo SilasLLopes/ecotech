@@ -91,7 +91,6 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
         variante="primario"
         grande
         fullWidth
-        className="px-4 text-center"
       >
         <Icon nome="folha" />
         Tenho material para ser reciclado
