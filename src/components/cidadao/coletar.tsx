@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -31,6 +31,19 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
   );
   const enviando = useRef(false);
   const tituloConfirmacao = useRef<HTMLHeadingElement>(null);
+
+  // Com cacheComponents o Next mantém esta tela viva (escondida) ao navegar;
+  // a limpeza roda quando ela é escondida, então a volta mostra o formulário
+  // limpo (sem a confirmação antiga nem foco puxado para ela).
+  useLayoutEffect(
+    () => () => {
+      setEnviado(null);
+      setQuantidades({});
+      setJanela("Manhã");
+      enviando.current = false;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (enviado) tituloConfirmacao.current?.focus();
