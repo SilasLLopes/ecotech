@@ -15,7 +15,7 @@ test("ordenarRota segue o vizinho mais próximo", () => {
   ]);
   assert.deepEqual(r.ordem, ["A", "C", "B"]);
   assert.equal(r.distanciaM, 300);
-  assert.equal(r.minutos, Math.round(300 / 60 + 4 * 3));
+  assert.equal(r.minutos, 17);
 });
 
 test("ordenarRota com lista vazia", () => {

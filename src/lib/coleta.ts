@@ -6,6 +6,7 @@ import type {
   Lancamento,
   Material,
   Meta,
+  Pedido,
 } from "./types";
 
 export const MULTIPLICADOR_MAX = 1.5;
@@ -38,10 +39,11 @@ export function reduzir(estado: Estado, acao: Acao): Estado {
       ) {
         return estado;
       }
-      return {
-        ...estado,
-        pedidos: [...estado.pedidos, { ...pedido, status: "aguardando" }],
-      };
+      // Pedido novo nasce aguardando, sem catador nem pontos.
+      const novo: Pedido = { ...pedido, status: "aguardando" };
+      delete novo.catadorId;
+      delete novo.pontos;
+      return { ...estado, pedidos: [...estado.pedidos, novo] };
     }
 
     case "aceitar": {
@@ -59,7 +61,8 @@ export function reduzir(estado: Estado, acao: Acao): Estado {
       if (
         !pedido ||
         pedido.status !== "aceito" ||
-        pedido.catadorId !== acao.catadorId
+        pedido.catadorId !== acao.catadorId ||
+        !estado.solicitantes.some((s) => s.id === pedido.solicitanteId)
       ) {
         return estado;
       }
@@ -241,7 +244,7 @@ const COLECOES = [
   "anuncios",
 ] as const;
 
-// Validação rasa: versão, destaque e presença das coleções como arrays.
+// Validação rasa: versão, destaque (tipos dos dois campos) e presença das coleções como arrays.
 // Não valida o formato de cada item.
 export function parseEstado(raw: string | null): Estado | null {
   if (!raw) return null;
@@ -256,7 +259,15 @@ export function parseEstado(raw: string | null): Estado | null {
   }
   const obj = dados as Record<string, unknown>;
   if (obj.versao !== 1) return null;
-  if (typeof obj.destaque !== "object" || obj.destaque === null) return null;
+  const destaque = obj.destaque as Record<string, unknown> | null;
+  if (typeof destaque !== "object" || destaque === null) return null;
+  if (
+    typeof destaque.materialId !== "string" ||
+    typeof destaque.multiplicador !== "number" ||
+    !Number.isFinite(destaque.multiplicador)
+  ) {
+    return null;
+  }
   if (!COLECOES.every((chave) => Array.isArray(obj[chave]))) return null;
   return obj as unknown as Estado;
 }

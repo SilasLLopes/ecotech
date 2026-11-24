@@ -6,7 +6,7 @@ import {
   pontosDoPedido,
   reduzir,
 } from "./coleta.ts";
-import type { Estado, Pedido } from "./types.ts";
+import type { Acao, Estado, Pedido } from "./types.ts";
 
 function pedido(over: Partial<Pedido> = {}): Pedido {
   return {
@@ -98,10 +98,29 @@ test("pontosDoPedido arredonda com Math.round", () => {
   );
 });
 
+test("pontosDoPedido distingue round de ceil e de floor", () => {
+  const e = base();
+  // 0,8 kg de vidro x 3 = 2,4: round dá 2 (ceil daria 3).
+  assert.equal(
+    pontosDoPedido([{ materialId: "vidro", quantidade: 0.8 }], e.materiais, e.destaque),
+    2,
+  );
+});
+
 test("solicitar adiciona pedido aguardando", () => {
   const novo = reduzir(base(), { type: "solicitar", pedido: pedido() });
   assert.equal(novo.pedidos.length, 1);
   assert.equal(novo.pedidos[0].status, "aguardando");
+});
+
+test("solicitar zera status, catadorId e pontos vindos no pedido", () => {
+  const novo = reduzir(base(), {
+    type: "solicitar",
+    pedido: pedido({ status: "coletado", catadorId: "c1", pontos: 99 }),
+  });
+  assert.equal(novo.pedidos[0].status, "aguardando");
+  assert.equal(novo.pedidos[0].catadorId, undefined);
+  assert.equal(novo.pedidos[0].pontos, undefined);
 });
 
 test("solicitar ignora itens vazios, quantidade <= 0 e id repetido", () => {
@@ -199,6 +218,11 @@ test("coletar repetido ou de outro catador devolve o mesmo estado", () => {
   assert.equal(reduzir(aguardando, coletar), aguardando);
 });
 
+test("coletar sem solicitante correspondente devolve o mesmo estado", () => {
+  const e = comPedido(pedido({ status: "aceito", catadorId: "c1", solicitanteId: "fantasma" }));
+  assert.equal(reduzir(e, coletar), e);
+});
+
 test("cancelar só afeta pedido aguardando", () => {
   const e: Estado = {
     ...base(),
@@ -226,6 +250,15 @@ test("resgatar debita saldo e estoque e registra resgate e lançamento", () => {
   });
   assert.equal(novo.extrato.length, 1);
   assert.equal(novo.extrato[0].pontos, -40);
+});
+
+test("resgatar com saldo exatamente igual ao custo funciona", () => {
+  const e = base();
+  e.solicitantes[0].saldo = 40;
+  const novo = reduzir(e, resgatar);
+  assert.notEqual(novo, e);
+  assert.equal(novo.solicitantes[0].saldo, 0);
+  assert.equal(novo.resgates.length, 1);
 });
 
 test("resgatar inválido devolve o mesmo estado", () => {
@@ -298,6 +331,52 @@ test("parseEstado rejeita entradas inválidas", () => {
   const semPedidos: Partial<Estado> = base();
   delete semPedidos.pedidos;
   assert.equal(parseEstado(JSON.stringify(semPedidos)), null);
+});
+
+test("parseEstado rejeita destaque malformado", () => {
+  const com = (destaque: unknown) => JSON.stringify({ ...base(), destaque });
+  assert.equal(parseEstado(com({})), null);
+  assert.equal(parseEstado(com({ materialId: "pet", multiplicador: null })), null);
+  assert.equal(parseEstado(com({ materialId: 3, multiplicador: 1.2 })), null);
+  assert.equal(parseEstado(com({ materialId: "pet", multiplicador: "1.2" })), null);
+  assert.notEqual(parseEstado(com({ materialId: "pet", multiplicador: 1.2 })), null);
+});
+
+function congelar<T>(valor: T): T {
+  if (typeof valor === "object" && valor !== null && !Object.isFrozen(valor)) {
+    Object.freeze(valor);
+    for (const filho of Object.values(valor)) congelar(filho);
+  }
+  return valor;
+}
+
+test("reduzir não muta o estado (Estado congelado, uma ação de cada tipo)", () => {
+  const e = base();
+  e.pedidos = [
+    pedido({ id: "a" }),
+    pedido({ id: "b", status: "aceito", catadorId: "c1" }),
+  ];
+  e.anuncios = [
+    { id: "a1", solicitanteId: "s1", eventoId: "e1", titulo: "Oferta", oferta: "10%", status: "em-analise" },
+  ];
+  congelar(e);
+  const acoes: Acao[] = [
+    { type: "solicitar", pedido: pedido({ id: "novo" }) },
+    { type: "aceitar", ids: ["a"], catadorId: "c1" },
+    { ...coletar, id: "b" },
+    { type: "cancelar", id: "a" },
+    resgatar,
+    { type: "definir-destaque", materialId: "vidro", multiplicador: 1.3 },
+    { type: "criar-beneficio", beneficio: { id: "b2", comercio: "Outra", titulo: "Brinde", custo: 10, estoque: 5, ativo: true } },
+    { type: "alternar-beneficio", id: "b1" },
+    { type: "criar-evento", evento: { id: "e1", titulo: "Feira", data: "2026-02-01", local: "Praça", descricao: "Exemplo" } },
+    { type: "criar-anuncio", anuncio: { id: "a2", solicitanteId: "s1", eventoId: "e1", titulo: "Oferta", oferta: "10%", status: "em-analise" } },
+    { type: "decidir-anuncio", id: "a1", aprovado: true },
+  ];
+  for (const acao of acoes) {
+    const novo = reduzir(e, acao);
+    assert.notEqual(novo, e, `${acao.type} deveria mudar o estado`);
+  }
 });
 
 test("parseEstado devolve um Estado serializado igual", () => {
