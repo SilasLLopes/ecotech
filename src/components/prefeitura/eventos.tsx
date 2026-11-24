@@ -208,8 +208,8 @@ export function Eventos() {
       )}
 
       <div className="grid items-start gap-8 lg:grid-cols-[1fr_24rem]">
-        <section aria-labelledby="lista" className="flex flex-col gap-4">
-          <h2 id="lista" className="text-xl font-semibold text-graphite">
+        <section aria-labelledby={`${uid}-lista`} className="flex flex-col gap-4">
+          <h2 id={`${uid}-lista`} className="text-xl font-semibold text-graphite">
             Eventos ({numero(eventos.length)})
           </h2>
           <p className="-mt-2 text-sm text-text-muted">
@@ -270,11 +270,12 @@ export function Eventos() {
           )}
         </section>
 
-        <section aria-labelledby="novo">
+        <section aria-labelledby={`${uid}-novo`}>
           <Card as="form" noValidate onSubmit={criar} className="flex flex-col gap-4">
-            <h2 id="novo" className="text-xl font-semibold text-graphite">
+            <h2 id={`${uid}-novo`} className="text-xl font-semibold text-graphite">
               Novo evento
             </h2>
+            <p className="text-sm text-text-muted">Todos os campos são obrigatórios.</p>
             <Campo
               id={ids.titulo}
               rotulo="Título"

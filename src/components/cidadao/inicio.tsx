@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -42,6 +43,7 @@ const ETAPAS = [
 
 export function Inicio({ perfil }: { perfil: PerfilMovel }) {
   const estado = useEstado();
+  const uid = useId();
   const dispatch = useDispatch();
   const solicitante = useSolicitante(perfil);
   const raiz = PERFIS[perfil].raiz;
@@ -88,8 +90,8 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
         Tenho material para ser reciclado
       </ButtonLink>
 
-      <Card as="section" aria-labelledby="item-semana" className="flex flex-col gap-2">
-        <h2 id="item-semana" className="text-xl font-semibold text-graphite">
+      <Card as="section" aria-labelledby={`${uid}-item-semana`} className="flex flex-col gap-2">
+        <h2 id={`${uid}-item-semana`} className="text-xl font-semibold text-graphite">
           Item da semana
         </h2>
         <p>
@@ -109,8 +111,8 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
       </Card>
 
       {solicitante.metas.length > 0 && (
-        <Card as="section" aria-labelledby="metas" className="flex flex-col gap-4">
-          <h2 id="metas" className="text-xl font-semibold text-graphite">
+        <Card as="section" aria-labelledby={`${uid}-metas`} className="flex flex-col gap-4">
+          <h2 id={`${uid}-metas`} className="text-xl font-semibold text-graphite">
             Suas metas
           </h2>
           <ul className="flex flex-col gap-4">
@@ -124,9 +126,9 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
       )}
 
       {ativo ? (
-        <Card as="section" aria-labelledby="pedido-ativo" className="flex flex-col gap-4">
+        <Card as="section" aria-labelledby={`${uid}-pedido-ativo`} className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 id="pedido-ativo" className="text-xl font-semibold text-graphite">
+            <h2 id={`${uid}-pedido-ativo`} className="text-xl font-semibold text-graphite">
               Sua coleta
             </h2>
             {ativo.status === "aguardando" ? (
@@ -213,8 +215,8 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
         </Card>
       )}
 
-      <Card as="section" aria-labelledby="atividades" className="flex flex-col gap-3">
-        <h2 id="atividades" className="text-xl font-semibold text-graphite">
+      <Card as="section" aria-labelledby={`${uid}-atividades`} className="flex flex-col gap-3">
+        <h2 id={`${uid}-atividades`} className="text-xl font-semibold text-graphite">
           Últimas atividades
         </h2>
         {atividades.length === 0 ? (

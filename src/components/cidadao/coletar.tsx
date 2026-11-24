@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -18,6 +18,7 @@ type Janela = (typeof JANELAS)[number];
 
 export function Coletar({ perfil }: { perfil: PerfilMovel }) {
   const estado = useEstado();
+  const uid = useId();
   const dispatch = useDispatch();
   const solicitante = useSolicitante(perfil);
   const raiz = PERFIS[perfil].raiz;
@@ -71,12 +72,12 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
     const { pedido } = enviado;
     return (
       <div className="flex flex-col gap-6">
-        <Card as="section" aria-labelledby="confirmacao" className="flex flex-col gap-4">
+        <Card as="section" aria-labelledby={`${uid}-confirmacao`} className="flex flex-col gap-4">
           <span className="inline-flex size-12 items-center justify-center rounded-full bg-mint-wash text-primary-strong">
             <Icon nome="check" className="size-7" />
           </span>
           <h1
-            id="confirmacao"
+            id={`${uid}-confirmacao`}
             ref={tituloConfirmacao}
             tabIndex={-1}
             className="text-2xl font-bold text-graphite focus:outline-none"
@@ -133,8 +134,8 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
         </p>
       </div>
 
-      <Card as="section" aria-labelledby="materiais" className="flex flex-col gap-4">
-        <h2 id="materiais" className="text-xl font-semibold text-graphite">
+      <Card as="section" aria-labelledby={`${uid}-materiais`} className="flex flex-col gap-4">
+        <h2 id={`${uid}-materiais`} className="text-xl font-semibold text-graphite">
           O que você tem
         </h2>
         <ul className="divide-y divide-border-soft">
@@ -180,8 +181,8 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
         </ul>
       </Card>
 
-      <Card as="section" aria-labelledby="endereco" className="flex flex-col gap-2">
-        <h2 id="endereco" className="text-xl font-semibold text-graphite">
+      <Card as="section" aria-labelledby={`${uid}-endereco`} className="flex flex-col gap-2">
+        <h2 id={`${uid}-endereco`} className="text-xl font-semibold text-graphite">
           Endereço da retirada
         </h2>
         <p className="flex items-start gap-2 text-base text-graphite">
@@ -251,7 +252,7 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
           Pedir coleta
         </Button>
         {vazio && (
-          <p id="motivo-pedir" className="text-sm text-text-muted">
+          <p id={`${uid}-motivo-pedir`} className="text-sm text-text-muted">
             Marque a quantidade de pelo menos um material para pedir a coleta.
           </p>
         )}

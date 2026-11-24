@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -26,6 +26,7 @@ const TRAVA_MS = 800;
 
 export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
   const estado = useEstado();
+  const uid = useId();
   const dispatch = useDispatch();
   const solicitante = useSolicitante(perfil);
   const [travado, setTravado] = useState(false);
@@ -116,8 +117,8 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
           />
         </Card>
       ) : (
-        <section aria-labelledby="beneficios" className="flex flex-col gap-4">
-          <h2 id="beneficios" className="text-xl font-semibold text-graphite">
+        <section aria-labelledby={`${uid}-beneficios`} className="flex flex-col gap-4">
+          <h2 id={`${uid}-beneficios`} className="text-xl font-semibold text-graphite">
             Benefícios para trocar
           </h2>
           <p className="-mt-2 text-sm text-text-muted">
@@ -161,13 +162,13 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
                         variante="primario"
                         fullWidth
                         disabled={Boolean(motivo) || travado}
-                        aria-describedby={motivo ? `motivo-${b.id}` : undefined}
+                        aria-describedby={motivo ? `${uid}-motivo-${b.id}` : undefined}
                         onClick={() => resgatar(b.id)}
                       >
                         Resgatar
                       </Button>
                       {motivo && (
-                        <p id={`motivo-${b.id}`} className="text-sm text-text-muted">
+                        <p id={`${uid}-motivo-${b.id}`} className="text-sm text-text-muted">
                           {motivo}
                         </p>
                       )}
@@ -189,8 +190,8 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
           />
         </Card>
       ) : (
-        <section aria-labelledby="cupons" className="flex flex-col gap-4">
-          <h2 id="cupons" className="text-xl font-semibold text-graphite">
+        <section aria-labelledby={`${uid}-cupons`} className="flex flex-col gap-4">
+          <h2 id={`${uid}-cupons`} className="text-xl font-semibold text-graphite">
             Meus cupons
           </h2>
           <ul className="flex flex-col gap-3">

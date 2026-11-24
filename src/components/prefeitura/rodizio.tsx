@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
@@ -26,11 +26,14 @@ const BOTAO_PASSO =
 
 export function Rodizio() {
   const estado = useEstado();
+  const uid = useId();
   const dispatch = useDispatch();
   // null = sem edição: a tela mostra o que está publicado (e acompanha
   // mudanças feitas em outra aba).
   const [rascunho, setRascunho] = useState<Rascunho | null>(null);
-  const [confirmacao, setConfirmacao] = useState<string | null>(null);
+  // Objeto novo a cada publicação: publicar duas vezes seguidas com os mesmos
+  // valores anuncia e leva o foco de novo.
+  const [confirmacao, setConfirmacao] = useState<{ texto: string } | null>(null);
   const confirmacaoRef = useRef<HTMLParagraphElement>(null);
 
   // Com cacheComponents o Next mantém esta tela viva (escondida) ao navegar
@@ -83,9 +86,9 @@ export function Rodizio() {
     if (!material) return;
     dispatch({ type: "definir-destaque", materialId, multiplicador });
     setRascunho(null);
-    setConfirmacao(
-      `Publicado: ${material.nome} com ${fator(multiplicador)} nesta semana. Quem for pedir coleta já vê a nova estimativa.`,
-    );
+    setConfirmacao({
+      texto: `Publicado: ${material.nome} com ${fator(multiplicador)} nesta semana. Quem for pedir coleta já vê a nova estimativa.`,
+    });
   }
 
   return (
@@ -153,8 +156,8 @@ export function Rodizio() {
           </div>
         </fieldset>
 
-        <div role="group" aria-labelledby="rotulo-mult" className="flex flex-col gap-3">
-          <p id="rotulo-mult" className="text-lg font-semibold text-graphite">
+        <div role="group" aria-labelledby={`${uid}-rotulo-mult`} className="flex flex-col gap-3">
+          <p id={`${uid}-rotulo-mult`} className="text-lg font-semibold text-graphite">
             Multiplicador do destaque
           </p>
           <div className="flex items-center gap-3">
@@ -167,12 +170,9 @@ export function Rodizio() {
             >
               <Icon nome="menos" />
             </button>
-            <output
-              aria-live="polite"
-              className="min-w-20 text-center text-2xl font-extrabold tabular-nums text-graphite"
-            >
+            <span className="min-w-20 text-center text-2xl font-extrabold tabular-nums text-graphite">
               {fator(multiplicador)}
-            </output>
+            </span>
             <button
               type="button"
               className={BOTAO_PASSO}
@@ -195,6 +195,7 @@ export function Rodizio() {
 
         {material && (
           <p className="text-lg text-graphite" aria-live="polite">
+            <span className="sr-only">Multiplicador {fator(multiplicador)}. </span>
             1 {material.unidade} de {material.nome} ={" "}
             <strong className="font-bold text-primary-strong">
               {numero(pontos(material, multiplicador))} pts com destaque
@@ -215,7 +216,7 @@ export function Rodizio() {
         {/* Região viva sempre montada: leitores de tela só anunciam texto que
             entra depois de montada. */}
         <div role="status" className="sr-only">
-          {confirmacao}
+          {confirmacao?.texto}
         </div>
         {confirmacao && (
           <p
@@ -224,13 +225,13 @@ export function Rodizio() {
             className="flex scroll-mt-20 items-start gap-2 rounded-lg bg-mint-wash p-4 text-base font-semibold text-primary-strong focus:outline-3 focus:outline-offset-2 focus:outline-tech-blue"
           >
             <Icon nome="check" className="mt-0.5" />
-            {confirmacao}
+            {confirmacao.texto}
           </p>
         )}
       </Card>
 
-      <section aria-labelledby="calendario" className="flex flex-col gap-3">
-        <h2 id="calendario" className="text-xl font-semibold text-graphite">
+      <section aria-labelledby={`${uid}-calendario`} className="flex flex-col gap-3">
+        <h2 id={`${uid}-calendario`} className="text-xl font-semibold text-graphite">
           Sugestão de calendário (exemplo)
         </h2>
         <p className="text-sm text-text-muted">

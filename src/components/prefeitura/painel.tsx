@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import type { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { Chip, type TomChip } from "@/components/ui/chip";
@@ -166,6 +167,7 @@ function Secao({
 
 export function Painel() {
   const estado = useEstado();
+  const uid = useId();
   const k = indicadores(estado);
   const recentes = estado.pedidos.slice().reverse().slice(0, 6);
   const colunasCatadores: Coluna<Estado["catadores"][number]>[] = [
@@ -205,8 +207,8 @@ export function Painel() {
         </p>
       </div>
 
-      <section aria-labelledby="indicadores">
-        <h2 id="indicadores" className="sr-only">
+      <section aria-labelledby={`${uid}-indicadores`}>
+        <h2 id={`${uid}-indicadores`} className="sr-only">
           Indicadores
         </h2>
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -224,7 +226,7 @@ export function Painel() {
       </section>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <Secao id="grafico" titulo="Coletas por semana (exemplo)">
+        <Secao id={`${uid}-grafico`} titulo="Coletas por semana (exemplo)">
           <Card className="flex flex-col gap-4">
             <p className="text-sm text-text-muted">
               Série de exemplo, não vem das coletas do app.
@@ -248,7 +250,7 @@ export function Painel() {
           </Card>
         </Secao>
 
-        <Secao id="catadores" titulo="Catadores associados">
+        <Secao id={`${uid}-catadores`} titulo="Catadores associados">
           <p className="flex items-start gap-2 rounded-lg bg-mint-wash p-3 text-sm text-graphite">
             <Icon nome="pessoas" className="mt-0.5 size-4 text-primary-strong" />
             Só catadores associados pela Prefeitura acessam o app.
@@ -273,7 +275,7 @@ export function Painel() {
         </Secao>
       </div>
 
-      <Secao id="recentes" titulo="Pedidos recentes">
+      <Secao id={`${uid}-recentes`} titulo="Pedidos recentes">
         {recentes.length === 0 ? (
           <Card>
             <EmptyState

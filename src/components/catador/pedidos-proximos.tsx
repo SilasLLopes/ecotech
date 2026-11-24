@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { MapaQuixada } from "@/components/mapa/mapa-quixada";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,6 +24,7 @@ const AVISO_INDISPONIVEL =
 
 export function PedidosProximos() {
   const estado = useEstado();
+  const uid = useId();
   const dispatch = useDispatch();
   const router = useRouter();
   const catador = useCatador();
@@ -129,8 +130,8 @@ export function PedidosProximos() {
             />
           </Card>
 
-          <section aria-labelledby="lista-pedidos" className="flex flex-col gap-4">
-            <h2 id="lista-pedidos" className="text-xl font-semibold text-graphite">
+          <section aria-labelledby={`${uid}-lista-pedidos`} className="flex flex-col gap-4">
+            <h2 id={`${uid}-lista-pedidos`} className="text-xl font-semibold text-graphite">
               Aguardando coleta ({numero(disponiveis.length)})
             </h2>
             <ul className="flex flex-col gap-3">
@@ -155,8 +156,8 @@ export function PedidosProximos() {
                         type="checkbox"
                         checked={marcado}
                         onChange={() => alternar(pedido.id)}
-                        aria-labelledby={`end-${pedido.id} bai-${pedido.id}`}
-                        aria-describedby={`det-${pedido.id}`}
+                        aria-labelledby={`${uid}-end-${pedido.id} ${uid}-bai-${pedido.id}`}
+                        aria-describedby={`${uid}-det-${pedido.id}`}
                         className="absolute inset-0 size-full cursor-pointer opacity-0 scroll-mb-48"
                       />
                       <span
@@ -168,16 +169,16 @@ export function PedidosProximos() {
                         {marcado && <Icon nome="check" className="size-4" />}
                       </span>
                       <span className="flex min-w-0 flex-col gap-1">
-                        <span id={`bai-${pedido.id}`} className="text-sm text-text-muted">
+                        <span id={`${uid}-bai-${pedido.id}`} className="text-sm text-text-muted">
                           {pedido.bairro}
                         </span>
                         <span
-                          id={`end-${pedido.id}`}
+                          id={`${uid}-end-${pedido.id}`}
                           className="text-base font-semibold text-graphite"
                         >
                           {pedido.endereco}
                         </span>
-                        <span id={`det-${pedido.id}`} className="flex flex-col gap-1">
+                        <span id={`${uid}-det-${pedido.id}`} className="flex flex-col gap-1">
                           <span className="text-base text-graphite">
                             {descreverItens(estado, pedido)}
                           </span>
@@ -218,7 +219,7 @@ export function PedidosProximos() {
         </div>
         {porDistancia.length > 0 && (
           <div className="pointer-events-auto flex flex-col gap-2 border-t border-border-soft bg-white px-4 py-3 shadow-raised">
-            <p id="resumo-rota" aria-live="polite" className="text-base font-semibold text-graphite">
+            <p id={`${uid}-resumo-rota`} aria-live="polite" className="text-base font-semibold text-graphite">
               {temSelecao
                 ? resumoDaRota(escolhidos.length, rota.distanciaM, rota.minutos)
                 : "Selecione pedidos para montar a rota"}
@@ -227,7 +228,7 @@ export function PedidosProximos() {
               variante="primario"
               fullWidth
               disabled={!temSelecao}
-              aria-describedby="resumo-rota"
+              aria-describedby={`${uid}-resumo-rota`}
               onClick={aceitar}
             >
               Aceitar e ver rota

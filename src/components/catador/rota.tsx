@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { MapaQuixada } from "@/components/mapa/mapa-quixada";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,6 +22,7 @@ type Feedback = { ok: boolean; texto: string };
 
 export function Rota() {
   const estado = useEstado();
+  const uid = useId();
   const dispatch = useDispatch();
   const catador = useCatador();
   // Paradas concluídas nesta visita e onde o catador está agora: a rota das
@@ -180,8 +181,8 @@ export function Rota() {
             </p>
           </Card>
 
-          <section aria-labelledby="paradas" className="flex flex-col gap-4">
-            <h2 id="paradas" className="text-xl font-semibold text-graphite">
+          <section aria-labelledby={`${uid}-paradas`} className="flex flex-col gap-4">
+            <h2 id={`${uid}-paradas`} className="text-xl font-semibold text-graphite">
               Paradas
             </h2>
             <ol className="flex flex-col gap-3">
