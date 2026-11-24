@@ -37,7 +37,7 @@ Texto `text-primary-strong underline-offset-4 hover:underline`. Link de navegaç
 
 Representa o saldo do cidadão. Origem: board "Cartão de Recompensas".
 
-- Fundo `bg-[linear-gradient(135deg,#126B4A,#202B28)]`, `rounded-xl`, `p-6`, `text-white`, `shadow-raised`, proporção ≈ 1.6:1.
+- Fundo `bg-reward` (token em `globals.css`: `--background-image-reward`, o degradê `primary-strong → graphite` a 135°; sem hex solto no componente), `rounded-xl`, `p-6`, `text-white`, `shadow-raised`, proporção ≈ 1.6:1.
 - Topo: logo horizontal **mono branca** (altura ~28px).
 - Meio: frase curta ("Você faz a diferença!") em `text-white/85`.
 - Base: saldo em número destacado: `text-4xl font-extrabold tabular-nums` + "pts" em `primary-soft`.

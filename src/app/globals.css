@@ -24,6 +24,14 @@
   --shadow-card: 0 1px 2px rgb(32 43 40 / 0.06), 0 8px 24px rgb(32 43 40 / 0.08);
   --shadow-raised: 0 12px 32px rgb(18 107 74 / 0.18);
 
+  /* Único degradê de superfície de destaque (DESIGN.md, Regra do Degradê Único):
+     cartão de recompensa. Uso: bg-reward. */
+  --background-image-reward: linear-gradient(
+    135deg,
+    var(--color-primary-strong),
+    var(--color-graphite)
+  );
+
   --ease-eco: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 

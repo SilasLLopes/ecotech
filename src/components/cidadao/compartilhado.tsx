@@ -1,0 +1,81 @@
+"use client";
+
+import { Logo } from "@/components/brand/logo";
+import { EmptyState } from "@/components/ui/empty-state";
+import { DEMO } from "@/data/seed";
+import { numero } from "@/lib/format";
+import { useEstado } from "@/lib/store";
+import type { Solicitante } from "@/lib/types";
+
+export type PerfilMovel = "cidadao" | "comerciante";
+
+// Solicitante do perfil de demonstração; undefined se sumiu do estado.
+export function useSolicitante(perfil: PerfilMovel): Solicitante | undefined {
+  const estado = useEstado();
+  return estado.solicitantes.find((s) => s.id === DEMO[perfil]);
+}
+
+export function SemSolicitante() {
+  return (
+    <EmptyState
+      icone="pessoas"
+      titulo="Não encontramos o cadastro de exemplo"
+      texto="Use o botão de reiniciar dados de exemplo, no topo da tela, para voltar ao começo."
+    />
+  );
+}
+
+const ISO = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}:\d{2}))?/;
+
+// O seed guarda horários em ISO; as ações da sessão guardam "Hoje, 14:32".
+// Lê a string, sem Date (seguro para renderização).
+export function formatarEm(em: string): string {
+  const m = ISO.exec(em);
+  if (!m) return em;
+  return m[4] ? `${m[3]}/${m[2]}, ${m[4]}` : `${m[3]}/${m[2]}`;
+}
+
+export function CartaoSaldo({
+  saldo,
+  comercio,
+}: {
+  saldo: number;
+  comercio: boolean;
+}) {
+  const vazio = saldo <= 0;
+  return (
+    <section
+      aria-label="Seu saldo de pontos"
+      className="relative min-h-48 overflow-hidden rounded-xl bg-reward p-6 text-white shadow-raised"
+    >
+      <svg
+        viewBox="0 0 200 140"
+        aria-hidden="true"
+        focusable="false"
+        className="pointer-events-none absolute bottom-0 right-0 h-3/4 w-auto fill-primary opacity-25"
+      >
+        <path d="M200 0C140 18 104 72 96 140H200Z" />
+      </svg>
+      <div className="relative flex min-h-36 flex-col justify-between gap-4">
+        <div className="flex items-start justify-between gap-3">
+          <Logo variante="horizontal" fundo="mono-branco" altura={28} />
+          <span className="text-xs text-white/85">Dados de exemplo</span>
+        </div>
+        <p className="max-w-60 text-base text-white/85">
+          {vazio
+            ? comercio
+              ? "Você ainda não tem pontos. Peça a primeira coleta do seu comércio."
+              : "Você ainda não tem pontos. Faça seu primeiro descarte."
+            : "Você faz a diferença!"}
+        </p>
+        <p className="flex items-baseline gap-2">
+          <span className="text-4xl font-extrabold tabular-nums">
+            {numero(saldo)}
+          </span>
+          <span className="text-lg font-semibold text-primary-soft">pts</span>
+          <span className="sr-only">de saldo</span>
+        </p>
+      </div>
+    </section>
+  );
+}

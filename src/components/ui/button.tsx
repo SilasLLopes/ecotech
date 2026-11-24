@@ -4,7 +4,7 @@ import type { ComponentProps } from "react";
 export type VarianteBotao = "primario" | "secundario" | "terciario" | "perigo";
 
 const BASE =
-  "inline-flex min-h-11 items-center justify-center gap-2 text-sm font-semibold transition-colors duration-200 motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tech-blue";
+  "inline-flex items-center justify-center gap-2 font-semibold transition-colors duration-200 motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tech-blue";
 
 const VARIANTES: Record<VarianteBotao, string> = {
   primario:
@@ -19,8 +19,26 @@ const VARIANTES: Record<VarianteBotao, string> = {
 const DESABILITADO =
   "disabled:cursor-not-allowed disabled:border-transparent disabled:bg-mint-wash disabled:text-text-muted disabled:no-underline";
 
-function classes(variante: VarianteBotao, fullWidth: boolean, extra?: string) {
-  return [BASE, VARIANTES[variante], DESABILITADO, fullWidth ? "w-full" : "", extra]
+// "grande" é o botão de ação principal da tela (ex.: "Tenho material...").
+const TAMANHOS = {
+  padrao: "min-h-11 text-sm",
+  grande: "min-h-14 text-base",
+};
+
+function classes(
+  variante: VarianteBotao,
+  fullWidth: boolean,
+  grande: boolean,
+  extra?: string,
+) {
+  return [
+    BASE,
+    grande ? TAMANHOS.grande : TAMANHOS.padrao,
+    VARIANTES[variante],
+    DESABILITADO,
+    fullWidth ? "w-full" : "",
+    extra,
+  ]
     .filter(Boolean)
     .join(" ");
 }
@@ -28,30 +46,34 @@ function classes(variante: VarianteBotao, fullWidth: boolean, extra?: string) {
 type ButtonProps = {
   variante: VarianteBotao;
   fullWidth?: boolean;
+  grande?: boolean;
 } & ComponentProps<"button">;
 
 export function Button({
   variante,
   fullWidth = false,
+  grande = false,
   className,
   type = "button",
   ...props
 }: ButtonProps) {
   return (
-    <button type={type} className={classes(variante, fullWidth, className)} {...props} />
+    <button type={type} className={classes(variante, fullWidth, grande, className)} {...props} />
   );
 }
 
 type ButtonLinkProps = {
   variante: VarianteBotao;
   fullWidth?: boolean;
+  grande?: boolean;
 } & ComponentProps<typeof Link>;
 
 export function ButtonLink({
   variante,
   fullWidth = false,
+  grande = false,
   className,
   ...props
 }: ButtonLinkProps) {
-  return <Link className={classes(variante, fullWidth, className)} {...props} />;
+  return <Link className={classes(variante, fullWidth, grande, className)} {...props} />;
 }

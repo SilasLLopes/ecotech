@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
+import { Inicio } from "@/components/cidadao/inicio";
 
-export const metadata: Metadata = { title: "Comerciante" };
+export const metadata: Metadata = { title: "Início do comerciante" };
 
 export default function Page() {
-  return (
-    <h1 className="text-2xl font-bold text-graphite">Início do comerciante</h1>
-  );
+  return <Inicio perfil="comerciante" />;
 }
