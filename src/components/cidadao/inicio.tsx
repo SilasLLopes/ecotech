@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { formatarEm, numero } from "@/lib/format";
 import { PERFIS } from "@/lib/nav";
-import { useDispatch, useEstado } from "@/lib/store";
+import { obterEstado, useDispatch, useEstado } from "@/lib/store";
 import type { Estado, Material, Meta, Pedido } from "@/lib/types";
 import {
   CartaoSaldo,
@@ -18,15 +18,16 @@ import {
   type PerfilMovel,
 } from "./compartilhado";
 
-// Pedido ativo = o mais recente (último do array) aguardando ou aceito.
-function pedidoAtivo(estado: Estado, solicitanteId: string): Pedido | undefined {
-  return [...estado.pedidos]
-    .reverse()
-    .find(
+// Pedidos ativos (aguardando ou aceitos) de quem pediu, o mais recente primeiro
+// (o último do array é o mais novo).
+function pedidosAtivos(estado: Estado, solicitanteId: string): Pedido[] {
+  return estado.pedidos
+    .filter(
       (p) =>
         p.solicitanteId === solicitanteId &&
         (p.status === "aguardando" || p.status === "aceito"),
-    );
+    )
+    .reverse();
 }
 
 function nomeNaFrase(m: Material | undefined): string {
@@ -37,8 +38,9 @@ function nomeNaFrase(m: Material | undefined): string {
 const ETAPAS = [
   { chave: "aguardando", rotulo: "Aguardando catador" },
   { chave: "aceito", rotulo: "Aceito pelo catador" },
-  { chave: "coletado", rotulo: "Coletado" },
 ] as const;
+
+type Aviso = { ok: boolean; texto: string };
 
 export function Inicio({ perfil }: { perfil: PerfilMovel }) {
   const estado = useEstado();
@@ -47,6 +49,27 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
   const solicitante = useSolicitante(perfil);
   const raiz = PERFIS[perfil].raiz;
   const comercio = perfil === "comerciante";
+  const [aviso, setAviso] = useState<Aviso | null>(null);
+  const avisoRef = useRef<HTMLParagraphElement>(null);
+
+  // Com cacheComponents o Next mantém esta tela viva (escondida) ao navegar; a
+  // limpeza roda quando ela é escondida, então a volta não traz o aviso antigo.
+  useLayoutEffect(
+    () => () => {
+      setAviso(null);
+    },
+    [],
+  );
+
+  // O pedido cancelado some da lista e leva o foco junto: leva o foco ao aviso
+  // (que também é anunciado pela região viva abaixo).
+  useEffect(() => {
+    if (!aviso) return;
+    const el = avisoRef.current;
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ block: "center" });
+  }, [aviso]);
 
   if (!solicitante) return <SemSolicitante />;
 
@@ -57,14 +80,25 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
     (m) => m.id === estado.destaque.materialId,
   );
   const acrescimo = Math.round((estado.destaque.multiplicador - 1) * 100);
-  const ativo = pedidoAtivo(estado, solicitante.id);
-  const catador = ativo?.catadorId
-    ? estado.catadores.find((c) => c.id === ativo.catadorId)
-    : undefined;
+  const ativos = pedidosAtivos(estado, solicitante.id);
   const atividades = estado.extrato
     .filter((l) => l.solicitanteId === solicitante.id)
     .slice(-5)
     .reverse();
+
+  function cancelar(pedido: Pedido) {
+    dispatch({ type: "cancelar", id: pedido.id });
+    // O reducer recusa se o catador aceitou antes (por exemplo, em outra aba).
+    const depois = obterEstado().pedidos.find((p) => p.id === pedido.id);
+    setAviso(
+      depois?.status === "cancelado"
+        ? { ok: true, texto: "Pedido cancelado. Você pode marcar material de novo quando quiser." }
+        : {
+            ok: false,
+            texto: "Não foi possível cancelar: o pedido já foi aceito por um catador.",
+          },
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -124,77 +158,121 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
         </Card>
       )}
 
-      {ativo ? (
-        <Card as="section" aria-labelledby={`${uid}-pedido-ativo`} className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-3">
-            <h2 id={`${uid}-pedido-ativo`} className="text-xl font-semibold text-graphite">
-              Sua coleta
-            </h2>
-            {ativo.status === "aguardando" ? (
-              <Chip tom="aviso" icone="relogio">
-                Aguardando
-              </Chip>
-            ) : (
-              <Chip tom="ok" icone="caminhao">
-                Aceito pelo catador
-              </Chip>
-            )}
-          </div>
-          <ol className="flex flex-col gap-2" aria-label="Etapas da coleta">
-            {ETAPAS.map((etapa, i) => {
+      {/* Região viva sempre montada: leitores de tela só anunciam texto que
+          entra depois de montada. */}
+      <div role="status" className="sr-only">
+        {aviso?.texto}
+      </div>
+      {aviso && (
+        <p
+          ref={avisoRef}
+          tabIndex={-1}
+          className={`flex scroll-mt-20 items-center gap-2 rounded-lg p-4 text-base font-semibold focus:outline-3 focus:outline-offset-2 focus:outline-tech-blue ${
+            aviso.ok ? "bg-mint-wash text-primary-strong" : "bg-danger/10 text-danger"
+          }`}
+        >
+          <Icon nome={aviso.ok ? "check" : "x"} />
+          {aviso.texto}
+        </p>
+      )}
+
+      {ativos.length > 0 ? (
+        <section aria-labelledby={`${uid}-coletas`} className="flex flex-col gap-4">
+          <h2 id={`${uid}-coletas`} className="text-xl font-semibold text-graphite">
+            Suas coletas
+          </h2>
+          <ul className="flex flex-col gap-4">
+            {ativos.map((ativo) => {
+              const catador = ativo.catadorId
+                ? estado.catadores.find((c) => c.id === ativo.catadorId)
+                : undefined;
               const atual = ETAPAS.findIndex((e) => e.chave === ativo.status);
-              const estadoEtapa = i < atual ? "feita" : i === atual ? "atual" : "proxima";
+              const rotuloPedido = `Pedido de ${formatarEm(ativo.criadoEm)}`;
               return (
-                <li
-                  key={etapa.chave}
-                  aria-current={estadoEtapa === "atual" ? "step" : undefined}
-                  className={`flex items-center gap-2 text-base ${
-                    estadoEtapa === "proxima"
-                      ? "text-text-muted"
-                      : "font-semibold text-graphite"
-                  }`}
-                >
-                  <span
-                    className={`inline-flex size-6 items-center justify-center rounded-full text-xs font-bold ${
-                      estadoEtapa === "proxima"
-                        ? "border border-border-soft text-text-muted"
-                        : "bg-primary-strong text-white"
-                    }`}
-                  >
-                    {estadoEtapa === "feita" ? (
-                      <Icon nome="check" tamanho="sm" />
-                    ) : (
-                      i + 1
+                <li key={ativo.id}>
+                  <Card className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3
+                        id={`${uid}-pedido-${ativo.id}`}
+                        className="text-lg font-semibold text-graphite"
+                      >
+                        {rotuloPedido}
+                      </h3>
+                      {ativo.status === "aguardando" ? (
+                        <Chip tom="aviso" icone="relogio">
+                          Aguardando
+                        </Chip>
+                      ) : (
+                        <Chip tom="ok" icone="caminhao">
+                          Aceito pelo catador
+                        </Chip>
+                      )}
+                    </div>
+                    <ol
+                      className="flex flex-col gap-2"
+                      aria-labelledby={`${uid}-pedido-${ativo.id}`}
+                    >
+                      {ETAPAS.map((etapa, i) => {
+                        const estadoEtapa =
+                          i < atual ? "feita" : i === atual ? "atual" : "proxima";
+                        return (
+                          <li
+                            key={etapa.chave}
+                            aria-current={estadoEtapa === "atual" ? "step" : undefined}
+                            className={`flex items-center gap-2 text-base ${
+                              estadoEtapa === "proxima"
+                                ? "text-text-muted"
+                                : "font-semibold text-graphite"
+                            }`}
+                          >
+                            <span
+                              className={`inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                                estadoEtapa === "proxima"
+                                  ? "border border-border-soft text-text-muted"
+                                  : "bg-primary-strong text-white"
+                              }`}
+                            >
+                              {estadoEtapa === "feita" ? (
+                                <Icon nome="check" tamanho="sm" />
+                              ) : (
+                                i + 1
+                              )}
+                            </span>
+                            {etapa.rotulo}
+                            {estadoEtapa === "atual" && (
+                              <span className="text-sm font-normal text-text-muted">
+                                (agora)
+                              </span>
+                            )}
+                            {etapa.chave === "aceito" &&
+                              catador &&
+                              estadoEtapa !== "proxima" && (
+                                <span className="text-sm font-normal text-text-muted">
+                                  : {catador.nome}
+                                </span>
+                              )}
+                          </li>
+                        );
+                      })}
+                    </ol>
+                    <p className="text-sm text-text-muted">
+                      {descreverItens(estado, ativo)}. Retirada: {ativo.janela}.
+                    </p>
+                    {ativo.status === "aguardando" && (
+                      <Button
+                        variante="secundario"
+                        aria-label={`Cancelar ${rotuloPedido.toLowerCase()}`}
+                        onClick={() => cancelar(ativo)}
+                      >
+                        Cancelar pedido
+                      </Button>
                     )}
-                  </span>
-                  {etapa.rotulo}
-                  {estadoEtapa === "atual" && (
-                    <span className="text-sm font-normal text-text-muted">
-                      (agora)
-                    </span>
-                  )}
-                  {etapa.chave === "aceito" && catador && estadoEtapa !== "proxima" && (
-                    <span className="text-sm font-normal text-text-muted">
-                      : {catador.nome}
-                    </span>
-                  )}
+                  </Card>
                 </li>
               );
             })}
-          </ol>
-          <p className="text-sm text-text-muted">
-            {descreverItens(estado, ativo)}. Retirada: {ativo.janela}. Pedido de{" "}
-            {formatarEm(ativo.criadoEm)}.
-          </p>
-          {ativo.status === "aguardando" && (
-            <Button
-              variante="secundario"
-              onClick={() => dispatch({ type: "cancelar", id: ativo.id })}
-            >
-              Cancelar pedido
-            </Button>
-          )}
-        </Card>
+          </ul>
+        </section>
       ) : (
         <Card>
           <EmptyState
