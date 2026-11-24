@@ -1,0 +1,262 @@
+import type {
+  Acao,
+  Destaque,
+  Estado,
+  ItemPedido,
+  Lancamento,
+  Material,
+  Meta,
+} from "./types";
+
+export const MULTIPLICADOR_MAX = 1.5;
+
+export function pontosDoPedido(
+  itens: ItemPedido[],
+  materiais: Material[],
+  destaque: Destaque,
+): number {
+  let total = 0;
+  for (const item of itens) {
+    const material = materiais.find((m) => m.id === item.materialId);
+    if (!material || !(item.quantidade > 0)) continue;
+    const fator =
+      item.materialId === destaque.materialId ? destaque.multiplicador : 1;
+    total += item.quantidade * material.pontosBase * fator;
+  }
+  return Math.round(total);
+}
+
+// Reducer puro: devolve o mesmo objeto quando a ação não muda nada.
+export function reduzir(estado: Estado, acao: Acao): Estado {
+  switch (acao.type) {
+    case "solicitar": {
+      const { pedido } = acao;
+      if (
+        pedido.itens.length === 0 ||
+        pedido.itens.some((i) => !(i.quantidade > 0)) ||
+        estado.pedidos.some((p) => p.id === pedido.id)
+      ) {
+        return estado;
+      }
+      return {
+        ...estado,
+        pedidos: [...estado.pedidos, { ...pedido, status: "aguardando" }],
+      };
+    }
+
+    case "aceitar": {
+      let mudou = false;
+      const pedidos = estado.pedidos.map((p) => {
+        if (p.status !== "aguardando" || !acao.ids.includes(p.id)) return p;
+        mudou = true;
+        return { ...p, status: "aceito" as const, catadorId: acao.catadorId };
+      });
+      return mudou ? { ...estado, pedidos } : estado;
+    }
+
+    case "coletar": {
+      const pedido = estado.pedidos.find((p) => p.id === acao.id);
+      if (
+        !pedido ||
+        pedido.status !== "aceito" ||
+        pedido.catadorId !== acao.catadorId
+      ) {
+        return estado;
+      }
+      const pontos = pontosDoPedido(
+        pedido.itens,
+        estado.materiais,
+        estado.destaque,
+      );
+      const novosLancamentos: Lancamento[] = [
+        {
+          id: acao.lancamentoId,
+          solicitanteId: pedido.solicitanteId,
+          descricao: "Coleta concluída",
+          pontos,
+          em: acao.em,
+        },
+      ];
+      const solicitantes = estado.solicitantes.map((s) => {
+        if (s.id !== pedido.solicitanteId) return s;
+        let saldo = s.saldo + pontos;
+        const metas = s.metas.map((meta): Meta => {
+          if (meta.concluida) return meta;
+          const progresso = meta.progresso + 1;
+          if (progresso < meta.alvo) return { ...meta, progresso };
+          saldo += meta.bonus;
+          novosLancamentos.push({
+            id: `${acao.lancamentoId}-${meta.id}`,
+            solicitanteId: s.id,
+            descricao: `Bônus da meta: ${meta.titulo}`,
+            pontos: meta.bonus,
+            em: acao.em,
+          });
+          return { ...meta, progresso, concluida: true };
+        });
+        return { ...s, saldo, metas };
+      });
+      return {
+        ...estado,
+        pedidos: estado.pedidos.map((p) =>
+          p.id === pedido.id ? { ...p, status: "coletado", pontos } : p,
+        ),
+        solicitantes,
+        catadores: estado.catadores.map((c) =>
+          c.id === acao.catadorId ? { ...c, coletas: c.coletas + 1 } : c,
+        ),
+        extrato: [...estado.extrato, ...novosLancamentos],
+      };
+    }
+
+    case "cancelar": {
+      const pedido = estado.pedidos.find((p) => p.id === acao.id);
+      if (!pedido || pedido.status !== "aguardando") return estado;
+      return {
+        ...estado,
+        pedidos: estado.pedidos.map((p) =>
+          p.id === acao.id ? { ...p, status: "cancelado" } : p,
+        ),
+      };
+    }
+
+    case "resgatar": {
+      const solicitante = estado.solicitantes.find(
+        (s) => s.id === acao.solicitanteId,
+      );
+      const beneficio = estado.beneficios.find((b) => b.id === acao.beneficioId);
+      if (
+        !solicitante ||
+        !beneficio ||
+        !beneficio.ativo ||
+        beneficio.estoque <= 0 ||
+        solicitante.saldo < beneficio.custo ||
+        estado.resgates.some((r) => r.id === acao.id)
+      ) {
+        return estado;
+      }
+      return {
+        ...estado,
+        solicitantes: estado.solicitantes.map((s) =>
+          s.id === solicitante.id ? { ...s, saldo: s.saldo - beneficio.custo } : s,
+        ),
+        beneficios: estado.beneficios.map((b) =>
+          b.id === beneficio.id ? { ...b, estoque: b.estoque - 1 } : b,
+        ),
+        resgates: [
+          ...estado.resgates,
+          {
+            id: acao.id,
+            solicitanteId: acao.solicitanteId,
+            beneficioId: acao.beneficioId,
+            codigo: acao.codigo,
+            em: acao.em,
+          },
+        ],
+        extrato: [
+          ...estado.extrato,
+          {
+            id: acao.id,
+            solicitanteId: acao.solicitanteId,
+            descricao: `Resgate: ${beneficio.titulo} (${beneficio.comercio})`,
+            pontos: -beneficio.custo,
+            em: acao.em,
+          },
+        ],
+      };
+    }
+
+    case "definir-destaque": {
+      if (
+        !estado.materiais.some((m) => m.id === acao.materialId) ||
+        !Number.isFinite(acao.multiplicador)
+      ) {
+        return estado;
+      }
+      const limitado = Math.min(Math.max(acao.multiplicador, 1), MULTIPLICADOR_MAX);
+      const multiplicador = Math.round(limitado * 100) / 100;
+      if (
+        estado.destaque.materialId === acao.materialId &&
+        estado.destaque.multiplicador === multiplicador
+      ) {
+        return estado;
+      }
+      return {
+        ...estado,
+        destaque: { materialId: acao.materialId, multiplicador },
+      };
+    }
+
+    case "criar-beneficio": {
+      if (estado.beneficios.some((b) => b.id === acao.beneficio.id)) return estado;
+      return { ...estado, beneficios: [...estado.beneficios, acao.beneficio] };
+    }
+
+    case "alternar-beneficio": {
+      if (!estado.beneficios.some((b) => b.id === acao.id)) return estado;
+      return {
+        ...estado,
+        beneficios: estado.beneficios.map((b) =>
+          b.id === acao.id ? { ...b, ativo: !b.ativo } : b,
+        ),
+      };
+    }
+
+    case "criar-evento": {
+      if (estado.eventos.some((e) => e.id === acao.evento.id)) return estado;
+      return { ...estado, eventos: [...estado.eventos, acao.evento] };
+    }
+
+    case "criar-anuncio": {
+      if (estado.anuncios.some((a) => a.id === acao.anuncio.id)) return estado;
+      return {
+        ...estado,
+        anuncios: [...estado.anuncios, { ...acao.anuncio, status: "em-analise" }],
+      };
+    }
+
+    case "decidir-anuncio": {
+      const status = acao.aprovado ? "aprovado" : "recusado";
+      const anuncio = estado.anuncios.find((a) => a.id === acao.id);
+      if (!anuncio || anuncio.status === status) return estado;
+      return {
+        ...estado,
+        anuncios: estado.anuncios.map((a) =>
+          a.id === acao.id ? { ...a, status } : a,
+        ),
+      };
+    }
+  }
+}
+
+const COLECOES = [
+  "materiais",
+  "solicitantes",
+  "catadores",
+  "pedidos",
+  "beneficios",
+  "resgates",
+  "extrato",
+  "eventos",
+  "anuncios",
+] as const;
+
+// Validação rasa: versão, destaque e presença das coleções como arrays.
+// Não valida o formato de cada item.
+export function parseEstado(raw: string | null): Estado | null {
+  if (!raw) return null;
+  let dados: unknown;
+  try {
+    dados = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (typeof dados !== "object" || dados === null || Array.isArray(dados)) {
+    return null;
+  }
+  const obj = dados as Record<string, unknown>;
+  if (obj.versao !== 1) return null;
+  if (typeof obj.destaque !== "object" || obj.destaque === null) return null;
+  if (!COLECOES.every((chave) => Array.isArray(obj[chave]))) return null;
+  return obj as unknown as Estado;
+}
