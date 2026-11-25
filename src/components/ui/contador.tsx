@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useHidratado } from "@/lib/hidratacao";
 import { interpolar } from "@/lib/movimento";
 
 const DURACAO_MS = 700;
@@ -22,12 +23,26 @@ export function Contador({
   const atual = useRef(valor);
   const sincronizado = useRef(false);
   const quadro = useRef<number | null>(null);
+  const hidratado = useHidratado();
+  const hidratadoAntes = useRef(false);
+
+  // Ao esconder a tela (cacheComponents) ou desmontar, a próxima execução do
+  // efeito abaixo volta a só sincronizar, sem animar uma mudança que ninguém viu.
+  useLayoutEffect(
+    () => () => {
+      sincronizado.current = false;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (quadro.current !== null) cancelAnimationFrame(quadro.current);
     quadro.current = null;
     const reduzido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!sincronizado.current || reduzido || atual.current === valor) {
+    // A troca do seed pelo estado salvo (hidratação) não é uma mudança a animar.
+    const real = hidratadoAntes.current && hidratado;
+    hidratadoAntes.current = hidratado;
+    if (!sincronizado.current || !real || reduzido || atual.current === valor) {
       sincronizado.current = true;
       atual.current = valor;
       setExibido(valor);
@@ -45,10 +60,8 @@ export function Contador({
     return () => {
       if (quadro.current !== null) cancelAnimationFrame(quadro.current);
       quadro.current = null;
-      // Ao esconder a tela, a próxima execução volta a só sincronizar.
-      sincronizado.current = false;
     };
-  }, [valor]);
+  }, [valor, hidratado]);
 
   return (
     <span className={`tabular-nums ${className ?? ""}`}>

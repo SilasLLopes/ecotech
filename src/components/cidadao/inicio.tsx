@@ -211,26 +211,41 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
                     </div>
                     <MapaAcompanhamento estado={estado} pedido={ativo} />
                     <ol
-                      className="flex flex-col gap-2"
+                      className="flex flex-col"
                       aria-labelledby={`${uid}-pedido-${ativo.id}`}
                     >
                       {ETAPAS.map((etapa, i) => {
                         const estadoEtapa =
                           i < atual ? "feita" : i === atual ? "atual" : "proxima";
+                        const ultima = i === ETAPAS.length - 1;
                         return (
                           <li
                             key={etapa.chave}
                             aria-current={estadoEtapa === "atual" ? "step" : undefined}
-                            className={`flex items-center gap-2 text-base ${
+                            className={`relative flex items-start gap-3 text-base ${ultima ? "" : "pb-5"} ${
                               estadoEtapa === "proxima"
                                 ? "text-text-muted"
                                 : "font-semibold text-graphite"
                             }`}
                           >
+                            {!ultima && (
+                              <span
+                                aria-hidden="true"
+                                className="absolute bottom-0 left-3 top-7 w-0.5 -translate-x-1/2 overflow-hidden rounded-full bg-border-soft"
+                              >
+                                <span
+                                  className="linha-tempo__fio block h-full w-full bg-primary-strong"
+                                  style={{ transform: `scaleY(${estadoEtapa === "feita" ? 1 : 0})` }}
+                                />
+                              </span>
+                            )}
                             <span
-                              className={`inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                              key={estadoEtapa}
+                              className={`relative inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors duration-300 motion-reduce:transition-none ${
+                                estadoEtapa === "atual" ? "pulso-selo" : ""
+                              } ${
                                 estadoEtapa === "proxima"
-                                  ? "border border-border-soft text-text-muted"
+                                  ? "border border-border-soft bg-white text-text-muted"
                                   : "bg-primary-strong text-white"
                               }`}
                             >
@@ -240,19 +255,21 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
                                 i + 1
                               )}
                             </span>
-                            {etapa.rotulo}
-                            {estadoEtapa === "atual" && (
-                              <span className="text-sm font-normal text-text-muted">
-                                (agora)
-                              </span>
-                            )}
-                            {etapa.chave === "aceito" &&
-                              catador &&
-                              estadoEtapa !== "proxima" && (
+                            <span className="flex flex-wrap items-baseline gap-x-1">
+                              {etapa.rotulo}
+                              {estadoEtapa === "atual" && (
                                 <span className="text-sm font-normal text-text-muted">
-                                  : {catador.nome}
+                                  (agora)
                                 </span>
                               )}
+                              {etapa.chave === "aceito" &&
+                                catador &&
+                                estadoEtapa !== "proxima" && (
+                                  <span className="text-sm font-normal text-text-muted">
+                                    : {catador.nome}
+                                  </span>
+                                )}
+                            </span>
                           </li>
                         );
                       })}
@@ -362,7 +379,7 @@ function MetaLinha({ meta }: { meta: Meta }) {
         className="h-2.5 overflow-hidden rounded-full bg-mint-wash"
       >
         <div
-          className="h-full rounded-full bg-primary"
+          className="barra-cresce h-full rounded-full bg-primary"
           style={{ width: `${pct}%` }}
         />
       </div>

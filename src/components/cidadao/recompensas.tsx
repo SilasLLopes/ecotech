@@ -255,42 +255,48 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
               const b = estado.beneficios.find((x) => x.id === r.beneficioId);
               const concedido = r.status === "concedido";
               return (
-                <li key={r.id}>
-                  <Card className="flex flex-col gap-2">
-                    <p className="text-sm text-text-muted">
-                      {b?.comercio ??
-                        (comercio ? "Prefeitura" : "Comércio parceiro")}{" "}
-                      · {formatarEm(r.em)}
-                    </p>
-                    <p className="text-base font-semibold text-graphite">
-                      {b?.titulo ??
-                        (comercio ? "Benefício solicitado" : "Benefício resgatado")}
-                    </p>
-                    {comercio && (
-                      <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        {concedido ? (
-                          <Chip tom="ok" icone="check">
-                            Concedido
-                          </Chip>
-                        ) : (
-                          <Chip tom="aviso" icone="relogio">
-                            Solicitado
-                          </Chip>
-                        )}
-                        <span className="text-sm text-text-muted">
-                          {concedido
-                            ? "A Prefeitura concedeu este benefício."
-                            : "A Prefeitura confirma a concessão."}
-                        </span>
+                <li key={r.id} className="ticket-entra">
+                  <div className="ticket relative flex overflow-hidden rounded-lg border border-border-soft bg-white shadow-card">
+                    <span aria-hidden="true" className="ticket__entalhe -top-[9px]" />
+                    <span aria-hidden="true" className="ticket__entalhe -bottom-[9px]" />
+                    <div className="flex min-w-0 flex-1 flex-col gap-2 p-4">
+                      <p className="text-sm text-text-muted">
+                        {b?.comercio ??
+                          (comercio ? "Prefeitura" : "Comércio parceiro")}{" "}
+                        · {formatarEm(r.em)}
                       </p>
-                    )}
-                    <p className="text-sm text-text-muted">
-                      {comercio ? "Protocolo" : "Código do cupom"}
-                    </p>
-                    <p className="text-2xl font-extrabold tracking-widest tabular-nums text-primary-strong">
-                      {r.codigo}
-                    </p>
-                  </Card>
+                      <p className="text-base font-semibold text-graphite">
+                        {b?.titulo ??
+                          (comercio ? "Benefício solicitado" : "Benefício resgatado")}
+                      </p>
+                      {comercio && (
+                        <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          {concedido ? (
+                            <Chip tom="ok" icone="check">
+                              Concedido
+                            </Chip>
+                          ) : (
+                            <Chip tom="aviso" icone="relogio">
+                              Solicitado
+                            </Chip>
+                          )}
+                          <span className="text-sm text-text-muted">
+                            {concedido
+                              ? "A Prefeitura concedeu este benefício."
+                              : "A Prefeitura confirma a concessão."}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex w-28 shrink-0 flex-col items-center justify-center gap-1 border-l-2 border-dashed border-border-soft bg-mint-wash p-3 text-center">
+                      <p className="text-xs font-medium text-text-muted">
+                        {comercio ? "Protocolo" : "Código"}
+                      </p>
+                      <p className="text-xl font-extrabold tracking-wider tabular-nums text-primary-strong">
+                        {r.codigo}
+                      </p>
+                    </div>
+                  </div>
                 </li>
               );
             })}

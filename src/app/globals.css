@@ -310,3 +310,51 @@ h3 {
     transparent
   );
 }
+
+/* Visto que se desenha (confirmação de pedido). */
+.visto-desenhado path {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: desenhar 520ms var(--ease-eco) 140ms forwards;
+}
+@keyframes desenhar {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Linha do tempo do pedido: o trecho entre etapas se preenche quando a etapa avança. */
+.linha-tempo__fio {
+  transform-origin: 50% 0;
+  transition: transform 560ms var(--ease-eco);
+}
+
+/* Barra de progresso que cresce na entrada. */
+.barra-cresce {
+  transform-origin: 0 50%;
+  animation: cresce-x var(--duration-slow) var(--ease-eco) 120ms backwards;
+}
+
+/* Ticket do cupom: entra com uma leve inclinação; entalhes do picote nas bordas. */
+.ticket-entra {
+  animation: ticket-entra 600ms var(--ease-eco) backwards;
+}
+@keyframes ticket-entra {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) rotate(-1.5deg) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ticket__entalhe {
+  position: absolute;
+  right: calc(7rem - 9px);
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--background);
+  border: 1px solid var(--color-border-soft);
+}

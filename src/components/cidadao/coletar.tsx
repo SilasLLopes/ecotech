@@ -4,7 +4,8 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
-import { Icon } from "@/components/ui/icon";
+import { ICONE_DO_MATERIAL, Icon } from "@/components/ui/icon";
+import { Contador } from "@/components/ui/contador";
 import { Stepper } from "@/components/ui/stepper";
 import { hora, numero, pontos } from "@/lib/format";
 import { PERFIS } from "@/lib/nav";
@@ -86,8 +87,22 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
     return (
       <div className="flex flex-col gap-6">
         <Card as="section" aria-labelledby={`${uid}-confirmacao`} className="flex flex-col gap-4">
-          <span className="inline-flex size-12 items-center justify-center rounded-full bg-mint-wash text-primary-strong">
-            <Icon nome="check" tamanho="xl" />
+          <span className="pulso-selo inline-flex size-14 items-center justify-center rounded-full bg-primary-strong text-white">
+            <svg
+              viewBox="0 0 24 24"
+              width="32"
+              height="32"
+              aria-hidden="true"
+              focusable="false"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="visto-desenhado"
+            >
+              <path d="m5 12.5 4.5 4.5L19 7.5" />
+            </svg>
           </span>
           <h1
             id={`${uid}-confirmacao`}
@@ -151,7 +166,7 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
         <h2 id={`${uid}-materiais`} className="text-xl font-semibold text-graphite">
           O que você tem
         </h2>
-        <ul className="divide-y divide-border-soft">
+        <ul className="flex flex-col gap-3">
           {estado.materiais.map((m) => {
             const quantidade = quantidades[m.id] ?? 0;
             const destaque = m.id === estado.destaque.materialId;
@@ -166,8 +181,16 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
               estado.destaque,
             );
             return (
-              <li key={m.id} className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0">
+              <li
+                key={m.id}
+                className={`flex flex-col gap-1 rounded-lg border p-3 transition-colors duration-200 motion-reduce:transition-none ${
+                  quantidade > 0
+                    ? "border-primary-strong bg-mint-wash"
+                    : "border-border-soft bg-white"
+                }`}
+              >
                 <Stepper
+                  icone={ICONE_DO_MATERIAL[m.id]}
                   rotulo={m.nome}
                   valor={quantidade}
                   unidade={m.unidade}
@@ -248,7 +271,9 @@ export function Coletar({ perfil }: { perfil: PerfilMovel }) {
       <div className="flex flex-col gap-3">
         <p aria-live="polite" className="text-base text-graphite">
           Estimativa:{" "}
-          <strong className="font-bold tabular-nums">{pontos(estimativa)}</strong>
+          <strong className="font-bold">
+            <Contador valor={estimativa} formatar={pontos} />
+          </strong>
           <span className="text-text-muted">
             {" "}
             (os pontos finais saem na coleta; valores de exemplo)

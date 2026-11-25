@@ -1,11 +1,15 @@
 "use client";
 
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Logo } from "@/components/brand/logo";
 import { Monolitos } from "@/components/brand/monolitos";
 import { Contador } from "@/components/ui/contador";
+import { Explosao } from "@/components/ui/explosao";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DEMO } from "@/data/seed";
 import { numero } from "@/lib/format";
+import { useHidratado } from "@/lib/hidratacao";
+import { rotuloDelta } from "@/lib/movimento";
 import { useEstado } from "@/lib/store";
 import type { Estado, Pedido, Solicitante } from "@/lib/types";
 
@@ -53,6 +57,42 @@ export function CartaoSaldo({
   comercio: boolean;
 }) {
   const vazio = saldo <= 0;
+  const [delta, setDelta] = useState<{ valor: number; id: number } | null>(null);
+  const [disparo, setDisparo] = useState(0);
+  const anterior = useRef(saldo);
+  const sincronizado = useRef(false);
+  const hidratado = useHidratado();
+  const hidratadoAntes = useRef(false);
+
+  // Ao esconder a tela, a volta só sincroniza o saldo: uma mudança que ninguém
+  // viu não dispara delta nem explosão.
+  useLayoutEffect(
+    () => () => {
+      sincronizado.current = false;
+    },
+    [],
+  );
+
+  // Quando o saldo muda diante do usuário: "+N pts" sobe e some; se foi ganho,
+  // uma explosão de hexágonos acompanha. Nunca na primeira renderização.
+  useEffect(() => {
+    // A troca do seed pelo estado salvo (hidratação) não é um ganho de pontos.
+    const real = hidratadoAntes.current && hidratado;
+    hidratadoAntes.current = hidratado;
+    if (!sincronizado.current || !real) {
+      sincronizado.current = true;
+      anterior.current = saldo;
+      return;
+    }
+    const variacao = saldo - anterior.current;
+    anterior.current = saldo;
+    if (variacao === 0) return;
+    setDelta((d) => ({ valor: variacao, id: (d?.id ?? 0) + 1 }));
+    if (variacao > 0) setDisparo((n) => n + 1);
+    const fim = setTimeout(() => setDelta(null), 1300);
+    return () => clearTimeout(fim);
+  }, [saldo, hidratado]);
+
   return (
     <section
       aria-label="Seu saldo de pontos"
@@ -71,10 +111,22 @@ export function CartaoSaldo({
               : "Você ainda não tem pontos. Faça seu primeiro descarte."
             : "Você faz a diferença!"}
         </p>
-        <p className="flex items-baseline gap-2">
+        <p className="relative flex items-baseline gap-2">
           <Contador valor={saldo} className="text-4xl font-extrabold" />
           <span className="text-lg font-semibold text-primary-soft">pts</span>
           <span className="sr-only">de saldo</span>
+          {delta && (
+            <span
+              key={delta.id}
+              aria-hidden="true"
+              className="delta-pontos absolute right-0 top-1/2 -mt-4 rounded-full bg-primary-soft px-2 py-0.5 text-sm font-bold text-graphite"
+            >
+              {rotuloDelta(delta.valor)}
+            </span>
+          )}
+          <span className="absolute left-12 top-1/2">
+            <Explosao disparo={disparo} />
+          </span>
         </p>
       </div>
     </section>

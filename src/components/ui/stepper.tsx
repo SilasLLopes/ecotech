@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { Icon } from "./icon";
+import { Icon, type IconeNome } from "./icon";
 
 type StepperProps = {
   rotulo: string;
@@ -10,6 +10,8 @@ type StepperProps = {
   onChange: (valor: number) => void;
   passo?: number;
   min?: number;
+  // Glifo do item: vira um selo que se enche e dá um pulso quando há quantidade.
+  icone?: IconeNome;
 };
 
 const BOTAO =
@@ -22,15 +24,35 @@ export function Stepper({
   onChange,
   passo = 1,
   min = 0,
+  icone,
 }: StepperProps) {
   const id = useId();
   const noMinimo = valor - passo < min;
   return (
-    <div role="group" aria-labelledby={id} className="flex items-center justify-between gap-3">
-      <span id={id} className="text-base font-medium text-graphite">
-        {rotulo}
+    <div
+      role="group"
+      aria-labelledby={id}
+      className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <span className="flex min-w-0 items-center gap-3">
+        {icone && (
+          <span
+            key={valor}
+            aria-hidden="true"
+            className={`inline-flex size-11 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 motion-reduce:transition-none ${
+              valor > 0
+                ? "pulso-selo bg-primary-strong text-white"
+                : "bg-mint-wash text-primary-strong"
+            }`}
+          >
+            <Icon nome={icone} />
+          </span>
+        )}
+        <span id={id} className="text-base font-medium text-graphite">
+          {rotulo}
+        </span>
       </span>
-      <div className="flex items-center gap-2">
+      <div className="flex w-full items-center gap-2 sm:w-auto">
         <button
           type="button"
           className={BOTAO}
@@ -45,7 +67,7 @@ export function Stepper({
         </button>
         <span
           aria-live="polite"
-          className="min-w-16 text-center text-base font-semibold tabular-nums text-graphite"
+          className="flex-1 text-center text-base font-semibold tabular-nums text-graphite sm:min-w-16 sm:flex-none"
         >
           {valor} {unidade}
         </span>
