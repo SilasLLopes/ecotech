@@ -100,13 +100,14 @@ Logo vertical, assinatura e quatro cartões de perfil (Cidadão, Comerciante, Ca
 
 ### Cidadão (`/cidadao`)
 
-Navegação inferior: Início · Coletar · Recompensas. Usuária de exemplo: Ana Beatriz Lima.
+Navegação inferior: Início · Coletar · Recompensas · Eventos. Usuária de exemplo: Ana Beatriz Lima.
 
 | Rota | O que mostra | Estados |
 |---|---|---|
 | `/cidadao` | Saudação, cartão de saldo (`bg-reward`), botão grande "Tenho material para ser reciclado", "Item da semana" (material em destaque e o acréscimo, com a nota de que a diferença é pequena de propósito), "Suas metas" (diária e mensal), "Suas coletas", últimas atividades do extrato | Coletas: vazia ("Nenhuma coleta em andamento") ou uma lista com **todos** os pedidos ativos (o mais recente primeiro), cada um com suas etapas (aguardando catador, aceito pelo catador); pedido coletado sai da lista e aparece em "Últimas atividades". "Cancelar pedido" em cada pedido, só enquanto aguarda, com aviso numa região viva (foco vai para o aviso). Extrato vazio. Cadastro de exemplo não encontrado (após limpar dados) com orientação de reiniciar |
 | `/cidadao/coletar` | Lista de materiais com `Stepper` (kg, L ou un), selo "Em destaque", endereço de exemplo, janela de retirada (Manhã, Tarde, Noite), estimativa de pontos ao vivo e "Pedir coleta" | Botão desabilitado e explicado enquanto nada foi marcado (`aria-describedby`). Após enviar: "Pedido enviado!" com resumo, "Acompanhar na tela inicial" e "Fazer outro pedido" |
 | `/cidadao/recompensas` | Cartão de saldo, lista de benefícios ativos do público cidadão com custo e "Resgatar", cupons resgatados com código | Saldo insuficiente ("Faltam N pts. Cada coleta aproxima você.") ou esgotado (chip "Esgotado"): botão desabilitado com o motivo ligado por `aria-describedby`; resgate com confirmação numa região viva e trava curta contra duplo toque; sem benefícios; sem cupons |
+| `/cidadao/eventos` | "Agenda da cidade" (componente `Agenda`, somente leitura): eventos da cidade (título, data, local, descrição), os mais novos cadastrados primeiro, com o texto "A Prefeitura divulga cada evento no próprio local. O app só mostra a agenda." | Sem eventos ("Nenhum evento marcado por enquanto"); um evento criado na Prefeitura aparece sozinho. Sem botões de ação |
 
 ### Comerciante (`/comerciante`)
 
@@ -115,7 +116,7 @@ Navegação inferior: Início · Coletar · Benefícios · Eventos. Comércio de
 | Rota | O que mostra | Estados |
 |---|---|---|
 | `/comerciante/beneficios` | Cartão de saldo, "Benefícios disponíveis" (só itens institucionais ativos, com custo, vagas e "Solicitar") e "Minhas solicitações" com protocolo e status | Mesmos estados do cidadão com o vocabulário do comércio (Sem vagas, "Faltam N pts"); solicitação confirmada numa região viva com o protocolo; status Solicitado (relógio) e Concedido (check), sempre texto + ícone, que muda sozinho quando a Prefeitura concede; sem benefícios; sem solicitações |
-| `/comerciante/eventos` | "Eventos e anúncios": eventos abertos da Prefeitura, cada um com "Anunciar neste evento" (formulário inline: título do anúncio, oferta ao cidadão) e "Meus anúncios" com status | Erros por campo com foco no primeiro; sem eventos; sem anúncios; status Em análise, Aprovado, Recusado (ícone + texto + ajuda); aviso numa região viva quando a Prefeitura decide |
+| `/comerciante/eventos` | A mesma "Agenda da cidade" do cidadão (`Agenda`), somente leitura | Sem eventos ("Nenhum evento marcado por enquanto"); um evento criado na Prefeitura aparece sozinho |
 
 ### Catador (`/catador`)
 
@@ -135,7 +136,7 @@ Painel largo; navegação em barra lateral (`lg`) ou inferior (menor). Itens: Pa
 | `/prefeitura` | "Painel da Prefeitura": cinco indicadores calculados do estado (coletas concluídas, material coletado por unidade, pontos distribuídos, cupons resgatados, aguardando coleta), gráfico "Coletas por semana (exemplo)" com tabela alternativa, catadores associados (tabela com nota de que só associados entram) e pedidos recentes | Sem catadores; sem pedidos. Gráfico é série fixa de exemplo, fora do estado |
 | `/prefeitura/rodizio` | Item em destaque agora, escolha do material (rádio), multiplicador de ×1,00 a ×1,50 em passos de 0,05 (`Stepper`-like), estimativa de exemplo para um pedido, "Publicar item da semana" (botão grande) e calendário sugerido de exemplo | Limite do multiplicador avisado; confirmação numa região viva; a publicação muda a estimativa na tela de pedir coleta e no item da semana dos demais perfis |
 | `/prefeitura/beneficios` | Tabela de benefícios com coluna Público (ativar e desativar), seção "Solicitações dos comerciantes" (protocolo, comerciante, benefício, data, chip Solicitado/Concedido e "Marcar como concedido", pendentes primeiro) e formulário "Novo benefício" com público (Cidadão ou Comerciante; Comerciante esconde "Comércio", usa "Prefeitura de Quixadá" e troca Estoque por Vagas) | Todos os campos obrigatórios, erros por campo com foco no primeiro; sem benefícios; sem solicitações; concessão única (o botão some) com foco e região viva no aviso; confirmação numa região viva |
-| `/prefeitura/eventos` | Anúncios em análise com "Aprovar" e "Recusar", lista de eventos e formulário "Criar evento" (título, data, local, descrição) | Erros por campo; sem eventos; confirmação numa região viva |
+| `/prefeitura/eventos` | Lista de eventos da cidade e formulário "Novo evento" (título, data, local, descrição). A Prefeitura divulga cada evento no próprio local; o app só mostra a agenda | Erros por campo com foco no primeiro; sem eventos; confirmação numa região viva |
 
 ### Página não encontrada (`src/app/not-found.tsx`)
 

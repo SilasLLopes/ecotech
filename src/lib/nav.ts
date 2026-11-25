@@ -46,6 +46,7 @@ export const NAV: Record<Perfil, ItemNav[]> = {
     { href: "/cidadao", rotulo: "Início", icone: "casa" },
     { href: "/cidadao/coletar", rotulo: "Coletar", icone: "folha" },
     { href: "/cidadao/recompensas", rotulo: "Recompensas", icone: "presente" },
+    { href: "/cidadao/eventos", rotulo: "Eventos", icone: "calendario" },
   ],
   comerciante: [
     { href: "/comerciante", rotulo: "Início", icone: "casa" },
