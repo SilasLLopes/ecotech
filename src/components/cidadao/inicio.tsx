@@ -5,6 +5,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
+import { MapaAcompanhamento } from "@/components/mapa/mapa-acompanhamento";
 import { Icon } from "@/components/ui/icon";
 import { formatarEm, numero } from "@/lib/format";
 import { PERFIS } from "@/lib/nav";
@@ -208,6 +209,7 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
                         </Chip>
                       )}
                     </div>
+                    <MapaAcompanhamento estado={estado} pedido={ativo} />
                     <ol
                       className="flex flex-col gap-2"
                       aria-labelledby={`${uid}-pedido-${ativo.id}`}

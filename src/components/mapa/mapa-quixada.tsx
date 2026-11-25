@@ -24,8 +24,12 @@ import { COR_ROTA, COR_ROTA_CONTORNO, estiloQuixada } from "./estilo-quixada";
 type Props = {
   pedidos: Pedido[];
   selecionados?: string[];
-  rota?: { origem: Ponto; ordem: string[] };
+  // `passando`: pontos por onde a rota passa antes das paradas de `ordem`,
+  // sem mostrar pino (por exemplo, paradas de outras pessoas).
+  rota?: { origem: Ponto; ordem: string[]; passando?: Ponto[] };
   posicaoCatador?: Ponto;
+  // Mapa da cidade: o pino mostra a situação do pedido (só leitura).
+  porStatus?: boolean;
   onSelecionar?: (id: string) => void;
   rotulo: string;
   altura?: "baixa" | "media" | "alta";
@@ -51,6 +55,13 @@ const TEXTOS_PT = {
   "CooperativeGesturesHandler.MacHelpText": "Use ⌘ + rolagem para aproximar o mapa",
   "CooperativeGesturesHandler.MobileHelpText": "Use dois dedos para mover o mapa",
 };
+
+const ROTULO_STATUS = {
+  aguardando: "aguardando coleta",
+  aceito: "aceito por um catador",
+  coletado: "coletado",
+  cancelado: "cancelado",
+} as const;
 
 const reduzirMovimento = () =>
   typeof window !== "undefined" &&
@@ -86,6 +97,7 @@ export function MapaQuixada({
   selecionados = [],
   rota,
   posicaoCatador,
+  porStatus = false,
   onSelecionar,
   rotulo,
   altura = "media",
@@ -208,16 +220,23 @@ export function MapaQuixada({
       }
       pino.marker.setOffset([n * 12, -n * 12]);
       const posicao = ordem.indexOf(pedido.id);
+      if (porStatus) {
+        pino.el.setAttribute(
+          "aria-label",
+          `Pedido em ${pedido.endereco}, ${pedido.bairro}: ${ROTULO_STATUS[pedido.status]}`,
+        );
+      }
       atualizarPino(
         pino.el,
         {
           selecionado: selecionados.includes(pedido.id),
           numero: posicao >= 0 ? posicao + 1 : undefined,
+          status: porStatus && pedido.status !== "cancelado" ? pedido.status : undefined,
         },
         interativo,
       );
     });
-  }, [mapa, lib, pedidos, selecionados, rota, onSelecionar]);
+  }, [mapa, lib, pedidos, selecionados, rota, onSelecionar, porStatus]);
 
   // Linha da rota pelas ruas: se desenha do começo ao fim quando a rota muda.
   useEffect(() => {
@@ -241,9 +260,16 @@ export function MapaQuixada({
     }
     const fonte = mapa.getSource(FONTE_ROTA) as GeoJSONSource;
     const alvos = rota
-      ? rota.ordem.flatMap((id) => pedidos.find((p) => p.id === id)?.ponto ?? [])
+      ? [
+          ...(rota.passando ?? []),
+          ...rota.ordem.flatMap((id) => pedidos.find((p) => p.id === id)?.ponto ?? []),
+        ]
       : [];
-    const chave = rota ? `${rota.origem.lng},${rota.origem.lat}|${rota.ordem.join(",")}` : null;
+    const chave = rota
+      ? `${rota.origem.lng},${rota.origem.lat}|${rota.ordem.join(",")}|${(rota.passando ?? [])
+          .map((p) => `${p.lng},${p.lat}`)
+          .join(";")}`
+      : null;
     if (chave === chaveRota.current) return;
     chaveRota.current = chave;
     if (animacaoRota.current !== null) cancelAnimationFrame(animacaoRota.current);

@@ -19,13 +19,20 @@ const CASA = '<path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19
 const GLIFO =
   'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
 
-export type EstadoPino = { selecionado: boolean; numero?: number };
+export type EstadoPino = {
+  selecionado: boolean;
+  numero?: number;
+  // Quando informado, o pino mostra a situação do pedido (mapa da cidade).
+  status?: "aguardando" | "aceito" | "coletado";
+};
 
-function conteudoDoPino({ selecionado, numero }: EstadoPino): string {
+function conteudoDoPino({ selecionado, numero, status }: EstadoPino): string {
+  const desenho =
+    status === "aceito" ? CAMINHAO : status === "coletado" || selecionado ? CHECK : FOLHA;
   const glifo =
     numero !== undefined
       ? `<text x="0" y="5.6" text-anchor="middle" font-size="16" font-weight="800" fill="currentColor" stroke="none">${Math.trunc(numero)}</text>`
-      : `<g transform="translate(-9 -9) scale(.75)" ${GLIFO}>${selecionado ? CHECK : FOLHA}</g>`;
+      : `<g transform="translate(-9 -9) scale(.75)" ${GLIFO}>${desenho}</g>`;
   return `<svg class="pino-mapa__forma" viewBox="-20 -20 40 40" aria-hidden="true" focusable="false"><polygon points="${HEXAGONO}" stroke-linejoin="round"/>${glifo}</svg>`;
 }
 
@@ -52,6 +59,8 @@ export function criarPino(
 export function atualizarPino(el: HTMLElement, estado: EstadoPino, interativo: boolean) {
   if (interativo) el.setAttribute("aria-pressed", String(estado.selecionado));
   el.dataset.selecionado = String(estado.selecionado);
+  if (estado.status) el.dataset.status = estado.status;
+  else delete el.dataset.status;
   el.innerHTML = conteudoDoPino(estado);
 }
 

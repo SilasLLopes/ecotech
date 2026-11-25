@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Chip, type TomChip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon, type IconeNome } from "@/components/ui/icon";
-import { COLETAS_POR_SEMANA } from "@/data/seed";
+import { MapaQuixada } from "@/components/mapa/mapa-quixada";
+import { BAIRROS, COLETAS_POR_SEMANA } from "@/data/seed";
 import { dataBR, formatarEm, numero } from "@/lib/format";
 import { useEstado } from "@/lib/store";
 import type { Estado, Pedido, StatusPedido } from "@/lib/types";
@@ -233,6 +234,38 @@ export function Painel() {
           <Indicador icone="relogio" rotulo="Aguardando coleta" valor={numero(k.aguardando)} />
         </ul>
       </section>
+
+      <Secao id={`${uid}-mapa`} titulo="Mapa da cidade">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <MapaQuixada
+            pedidos={estado.pedidos.filter((p) => p.status !== "cancelado")}
+            porStatus
+            rotulo="Mapa da cidade com os pedidos de coleta por situação"
+            altura="alta"
+          />
+          <Card className="flex flex-col gap-4">
+            <p className="text-sm text-text-muted">
+              Hexágono cheio: aguardando coleta. Hexágono com caminhão: aceito por um
+              catador. Ponto menor com marca de confirmação: já coletado.
+            </p>
+            <ul className="flex flex-col gap-2">
+              {BAIRROS.map((b) => {
+                const deles = estado.pedidos.filter((p) => p.bairro === b.nome);
+                const conta = (s: StatusPedido) => deles.filter((p) => p.status === s).length;
+                return (
+                  <li key={b.id} className="flex items-baseline justify-between gap-3 text-sm">
+                    <span className="font-semibold text-graphite">{b.nome}</span>
+                    <span className="text-text-muted">
+                      {numero(conta("aguardando"))} aguardando · {numero(conta("aceito"))} aceitos ·{" "}
+                      {numero(conta("coletado"))} coletados
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+        </div>
+      </Secao>
 
       <div className="grid gap-8 lg:grid-cols-2">
         <Secao id={`${uid}-grafico`} titulo="Coletas por semana (exemplo)">

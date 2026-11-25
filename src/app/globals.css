@@ -148,3 +148,20 @@ body {
     transform: scale(2);
   }
 }
+
+/* Mapa da cidade (Prefeitura): a situação do pedido muda o desenho do pino. */
+.pino-mapa[data-status="aceito"] .pino-mapa__forma polygon {
+  fill: var(--color-white);
+  stroke: var(--color-primary-strong);
+  stroke-width: 3;
+}
+.pino-mapa[data-status="aceito"] {
+  color: var(--color-primary-strong);
+}
+.pino-mapa[data-status="coletado"] .pino-mapa__forma {
+  transform: scale(0.62);
+  opacity: 0.9;
+}
+.pino-mapa[data-status="coletado"] .pino-mapa__forma polygon {
+  fill: var(--color-primary);
+}
