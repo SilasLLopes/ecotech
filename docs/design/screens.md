@@ -147,3 +147,12 @@ Limitações conhecidas do protótipo estão em [`decisions.md`](../process/deci
 ## Checklist antes de dar uma tela como pronta
 
 Ver [`workflow.md`](../process/workflow.md) §6 (definição de pronto de UI).
+
+## 11. Identidade e movimento (frente C)
+
+- **Abertura `/`**: apresentação com a assinatura em destaque e a silhueta dos monólitos de borda a borda; os quatro perfis como painéis com **prévia viva** dos dados de exemplo (saldo da Ana com contador, pedidos aguardando e distância do mais perto, benefícios do programa, coletas concluídas e item em destaque), cada um com a sua composição e entrada em sequência.
+- **Cidadão**: saldo vivo (contador, "+N pts" e explosão ao creditar), "Suas coletas" com mapa de acompanhamento e linha do tempo, peças de material com glifo, confirmação com o visto que se desenha, cupom como ticket.
+- **Catador**: mapa de borda a borda e lista como gaveta; pedidos com glifos dos materiais e seleção com resposta tátil; paradas da rota como linha do tempo com a próxima em destaque.
+- **Prefeitura**: faixa de indicadores, mapa da cidade com ranking de pedidos por bairro, gráfico com barras que crescem, rodízio com glifos, multiplicador grande e calendário como linha do tempo.
+- **Vazios e 404**: silhueta dos monólitos com o ícone do assunto pousado nela.
+- **Cabeçalho**: a faixa "Protótipo com dados de exemplo" ficou fina (uma linha, `text-xs`) e continua em todas as telas.

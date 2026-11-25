@@ -198,6 +198,8 @@ Cantos arredondados: `sm 8` (chips pequenos, tags), `md 12` (botões, campos), `
 - **Hexágono** (do símbolo): máscara para avatares de parceiro, selo de nível/conquista, pino do mapa. Cantos levemente arredondados.
 - **Curva de folha** (a "onda" do banner): formas grandes, translúcidas (`primary` a 10 a 25%), cortando o canto de banners, cartões de destaque e materiais institucionais. Uma por superfície.
 - **Nó de circuito** (linha + círculo vazado, em `tech-blue`): divisores curtos, marcadores de passo e indicadores de "conectado". Pequeno e raro.
+- **Monólitos de Quixadá** (`brand/monolitos.tsx`): silhueta própria das cúpulas de granito do sertão, em `primary` (fundo claro) ou `primary-soft` (fundo escuro) a 20 a 70% de opacidade, na base de aberturas, do cartão de saldo, de estados vazios e da página 404. É a leitura local da "silhueta de cidade verde" do board; nunca sobre texto pequeno sem conferir o contraste. Substitui a curva de folha nesses lugares.
+- **Glifos de materiais** (`ICONE_DO_MATERIAL` em `ui/icon.tsx`): garrafa (PET), caixa (papelão), lata, garrafa de vidro, gota (óleo) e chip (eletrônicos), no mesmo traço dos demais ícones. Cada material usa o seu em listas, peças de pedido e calendário.
 
 Ícones: traço (outline) de 1,75 a 2px, cantos arredondados, estilo consistente (sugestão: Lucide, **[ABERTO]** D-08). Ícones de propósito do board: folha (reciclagem), pino (locais de coleta), troféu (recompensas), pessoas (cidade).
 

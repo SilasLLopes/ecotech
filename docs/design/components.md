@@ -137,6 +137,20 @@ Mapa vetorial real de Quixadá (MapLibre GL JS), que **funciona sem internet**: 
 
 Mapa baixo no cartão de cada coleta do cidadão: o pino do endereço e, com catador, o marcador dele, a rota pelas ruas até o endereço (passando pelas paradas anteriores **sem mostrar os endereços de outras pessoas**) e o chip "Chega em ~N min" com "É a próxima parada" ou "N paradas antes da sua" e a distância (estimativa). Sem catador: "Assim que um catador aceitar, o caminho até você aparece aqui." A previsão vem de `acompanhar` (`src/lib/acompanhamento.ts`).
 
+## Movimento e identidade (`ui/contador.tsx`, `revelar.tsx`, `explosao.tsx`, `brand/monolitos.tsx`)
+
+- **`Contador({ valor, formatar? })`**: número que conta até o novo valor em ~700 ms. Não anima na montagem, nem ao voltar a uma tela escondida, nem na troca do seed pelo estado salvo na hidratação (`useHidratado`); movimento reduzido mostra o valor final na hora. O texto visível é `aria-hidden` e há o valor final em `sr-only`.
+- **`Revelar({ indice, as })`**: entrada em sequência (subida de 12 px e opacidade, 60 ms por posição, no máximo 6). Só toca ao montar.
+- **`Explosao({ disparo })`**: seis hexágonos que se espalham em 760 ms quando `disparo` sobe; só em ganho real de pontos. Oculta com movimento reduzido.
+- **Saldo vivo** (`CartaoSaldo`): além do contador, mostra "+N pts" que sobe e some quando o saldo muda diante do usuário, e a explosão se foi ganho.
+- **Linha do tempo do pedido** (`cidadao/inicio.tsx`): etapas verticais com o fio que se preenche (`.linha-tempo__fio`) quando a etapa avança e pulso no selo da etapa atual.
+- **Peça de material** (`Stepper` com `icone`): o selo com o glifo do material se enche e dá um pulso quando há quantidade; no celular o seletor desce para uma segunda linha, para o nome não ficar espremido.
+- **Ticket do cupom** (`cidadao/recompensas.tsx`): canhoto com picote, entra com uma leve inclinação; código (cidadão) ou protocolo (comerciante) no canhoto.
+- **Gaveta** (`catador/pedidos-proximos.tsx`, `rota.tsx`): mapa de borda a borda grudado sob o cabeçalho (`altura="cheia"`) e a lista sobe sobre ele com canto arredondado e sombra; paradas da rota como linha do tempo com a próxima em destaque.
+- **Faixa de indicadores** (`prefeitura/painel.tsx`): uma moldura com divisórias de 1 px, número grande com `Contador` e o que ele mede; sem cartões nem ícones em círculo. **Pedidos por bairro**: ranking com barras que crescem, sempre com o número e a divisão em texto.
+- **`Monolitos`**: ver `DESIGN.md` (motivo de marca). Esmaecimento lateral com `.silhueta-suave` quando recortada num quadro.
+- Tudo respeita `prefers-reduced-motion`: a animação termina na hora e o estado final aparece.
+
 ## Parada de rota (`catador/rota.tsx`)
 
 Item de `<ol>` dentro de um `Card`: círculo `tech-blue` com o número (decorativo; o `h3` traz "Parada N:" em `sr-only`), endereço como título, bairro e solicitante, itens, janela de retirada, chip "cerca de N pts" (estimativa) e, só na primeira, chip "Próxima parada" e o botão "Coletado" (com `aria-label` que diz qual parada). As demais mostram "Depois da parada N". Ao coletar, a região viva da tela anuncia "+N pts para <solicitante>", a posição do catador passa a ser a parada coletada (guardada no estado) e a rota das restantes é recalculada a partir dela.
