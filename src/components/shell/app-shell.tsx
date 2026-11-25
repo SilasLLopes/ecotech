@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
@@ -58,7 +59,7 @@ export function AppShell({
             painel ? "lg:pb-10" : ""
           } ${coluna}`}
         >
-          {children}
+          <ViewTransition>{children}</ViewTransition>
         </main>
       </div>
       <BottomNav perfil={perfil} />

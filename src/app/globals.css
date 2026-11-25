@@ -33,6 +33,9 @@
   );
 
   --ease-eco: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --duration-fast: 160ms;
+  --duration-base: 260ms;
+  --duration-slow: 640ms;
 }
 
 :root {
@@ -44,6 +47,23 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* Superfícies do navegador no estilo da marca. */
+::selection {
+  background: var(--color-primary-soft);
+  color: var(--color-graphite);
+}
+:root {
+  accent-color: var(--color-primary-strong);
+  caret-color: var(--color-primary-strong);
+  scrollbar-color: var(--color-border-soft) transparent;
+  scrollbar-width: thin;
+}
+h1,
+h2,
+h3 {
+  text-wrap: balance;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -164,4 +184,118 @@ body {
 }
 .pino-mapa[data-status="coletado"] .pino-mapa__forma polygon {
   fill: var(--color-primary);
+}
+
+/* Movimento com função (DESIGN.md > Motion). Tudo respeita prefers-reduced-motion
+   pelo bloco global acima: a animação termina na hora e o estado final aparece. */
+.revelar {
+  animation: entrar var(--duration-slow) var(--ease-eco) backwards;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cresce-y {
+  transform-origin: 50% 100%;
+  animation: cresce-y var(--duration-slow) var(--ease-eco) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes cresce-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.cresce-x {
+  transform-origin: 0 50%;
+  animation: cresce-x var(--duration-slow) var(--ease-eco) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes cresce-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.pulso-selo {
+  animation: pulso-selo var(--duration-base) var(--ease-eco);
+}
+@keyframes pulso-selo {
+  40% {
+    transform: scale(1.12);
+  }
+}
+
+/* Explosão de hexágonos: 6 pedaços que se espalham e somem (quando os pontos chegam). */
+.explosao {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.explosao__hex {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 16px;
+  margin: -8px 0 0 -7px;
+  background: var(--color-primary-soft);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  animation: explosao 760ms var(--ease-eco) forwards;
+}
+.explosao__hex:nth-child(odd) {
+  background: var(--color-primary);
+}
+@keyframes explosao {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.4) rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(1) rotate(120deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .explosao {
+    display: none;
+  }
+}
+
+/* "+N pts" que sobe e some ao lado do saldo. */
+.delta-pontos {
+  animation: delta-pontos 1100ms var(--ease-eco) forwards;
+}
+@keyframes delta-pontos {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
 }

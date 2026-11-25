@@ -235,7 +235,7 @@ Detalhamento completo, estados e acessibilidade: `docs/design/components.md`. Re
 
 ## Motion
 
-Curto, útil e suave: 150 a 250ms, `cubic-bezier(0.2, 0.7, 0.2, 1)`; entrada de cartões com leve subida (8px) e opacidade; contadores de pontos podem animar o número. Sem bounce, sem animação decorativa contínua. Com `prefers-reduced-motion: reduce`, trocar movimento por troca imediata ou fade.
+Movimento com função: cada animação mostra uma causa e um efeito (o pedido que vira pino, o pino que vira caminho, o caminho que vira pontos). Respostas de toque em 150 a 250ms; o momento principal de uma tela (pontos que chegam, rota que se desenha, ticket do cupom) em 400 a 800ms, com teto de 1,2s (a rota do mapa vai até 1,8s). Curva `cubic-bezier(0.2, 0.7, 0.2, 1)` (`--ease-eco`), sem bounce e sem laço decorativo; a única animação contínua é o pulso do catador no mapa. Listas entram em sequência (subida de 12px e opacidade, 60ms entre itens, no máximo 6), números de pontos contam até o novo valor, barras crescem na entrada, linhas de progresso se preenchem. Nada bloqueia o clique. Com `prefers-reduced-motion: reduce` toda animação termina na hora e o **estado final** aparece, mantendo o feedback (mudança de cor, ícone, texto); a rota do mapa aparece inteira e o catador salta de ponto.
 
 ## Implementation (Tailwind 4)
 
