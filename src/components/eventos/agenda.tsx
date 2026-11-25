@@ -8,10 +8,10 @@ import { useEstado } from "@/lib/store";
 
 // Agenda da cidade, somente leitura. Quem cadastra os eventos é a Prefeitura
 // (/prefeitura/eventos); ela os divulga no próprio local, o app só os lista.
-// Os mais novos cadastrados vêm primeiro.
+// Ordem por data do evento, o mais próximo primeiro.
 export function Agenda() {
   const estado = useEstado();
-  const eventos = estado.eventos.slice().reverse();
+  const eventos = estado.eventos.slice().sort((a, b) => a.data.localeCompare(b.data));
 
   return (
     <div className="flex w-full max-w-3xl flex-col gap-6">
@@ -39,7 +39,7 @@ export function Agenda() {
                 <div>
                   <p className="flex items-center gap-2 text-sm font-semibold text-primary-strong">
                     <Icon nome="calendario" tamanho="sm" />
-                    {dataBR(ev.data)}
+                    <time dateTime={ev.data}>{dataBR(ev.data)}</time>
                   </p>
                   <h2 className="text-lg font-semibold text-graphite">{ev.titulo}</h2>
                   <p className="flex items-center gap-2 text-sm text-text-muted">
