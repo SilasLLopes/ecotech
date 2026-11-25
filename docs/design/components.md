@@ -122,18 +122,24 @@ Controle de quantidade: `role="group"` rotulado, botão Diminuir, valor com unid
 - **Inferior**: `<nav aria-label="Principal">` fixa na base, coluna `max-w-md`, um item por rota do perfil (`NAV` em `src/lib/nav.ts`: 2 a 4 itens). Cada item tem ícone + rótulo completo (`text-xs leading-tight`, sem truncar; "Recompensas" cabe em 360px com 4 itens), altura mínima de 64px, `aria-current="page"` e faixa superior de 3px no ativo (não só cor). A raiz do perfil só fica ativa na rota exata (`itemAtivo`). Respeita a área segura do aparelho.
 - **Lateral**: só a Prefeitura, a partir de `lg` (nela, a inferior some a partir de `lg`). `<nav aria-label="Painel">`, 240px, ativo com `bg-primary-strong text-white` (receita "Barra lateral do painel").
 
-## Mapa esquemático (`mapa/mapa-quixada.tsx`)
+## Mapa (`mapa/mapa-quixada.tsx`)
 
-SVG inline de Quixadá (400 × 300 unidades; 1 unidade = 10 m), com os cinco bairros de `MAPA` em `src/data/seed.ts`. Dados de exemplo; legenda fixa "Mapa esquemático, não representa o trajeto real". Substitui, no MVP, a receita "Pino do mapa" (D-03 aberto).
+Mapa vetorial real de Quixadá (MapLibre GL JS), que **funciona sem internet**: tiles PMTiles, fontes e ícones do estilo ficam em `public/map/` e o worker do MapLibre é copiado para lá por `scripts/sync-maplibre-worker.mjs` (`predev` e `prebuild`). O estilo (`estilo-quixada.ts`) é o tema claro do Protomaps repintado com a paleta da marca: terra e quadras em tons de menta, vegetação em verde suave, água em azul tecnológico claro, vias brancas com contorno `border-soft`, rótulos em grafite, bairros em `primary-strong`; sem pontos de interesse. As cores do estilo são constantes nomeadas com o token de origem em comentário (um estilo de mapa é JSON e não lê variáveis CSS). Atribuição "© OpenStreetMap contributors · Protomaps" sempre visível.
 
-- Props: `pedidos`, `selecionados`, `rota` (`origem` + `ordem` de ids), `onSelecionar` e `rotulo` (vira `role="img"` + `aria-label` + `<title>`).
-- Pino: hexágono `primary-strong` (raio 13; 17 e com ícone de check se selecionado, contorno branco e sombra) com a folha. Pinos que se sobreporiam são afastados em torno do ponto real. Na rota, cada pino ganha um selo `tech-blue` com o número da parada e uma linha liga a origem do catador (círculo `tech-blue` com casa e o texto "Origem") às paradas em ordem.
-- Acessibilidade: o SVG é só imagem. A seleção acontece pela **lista** (a alternativa acessível); sobre cada pino há um `<button>` transparente de 44px com `aria-label` ("Pedido em <endereço>, <bairro>, parada N da rota, selecionado"), então o mapa nunca é o único caminho e o toque tem o alvo mínimo.
-- Cores só por token (`fill-mint-wash`, `stroke-border-soft`, `fill-tech-blue`, `fill-graphite`...); texto do mapa em unidades do viewBox.
+- Props: `pedidos`, `selecionados`, `rota` (`origem`, `ordem` de ids e `passando`, pontos por onde a linha passa sem mostrar pino), `posicaoCatador`, `porStatus`, `onSelecionar`, `rotulo`, `altura` (`baixa`, `media`, `alta`). Carrega a biblioteca sob demanda; esqueleto "Carregando o mapa" enquanto isso.
+- Pino (`marcadores.ts`, classes `.pino-mapa` em `globals.css`): hexágono `primary-strong` com folha; selecionado maior (escala 1,28) com marca de confirmação; com `onSelecionar` é um `<button>` de 44px com `aria-pressed` e nome "Pedido em <endereço>, <bairro>"; sem ele é só imagem. **Entra com uma queda curta**, escalonada (até 8 pinos). Na rota, o pino mostra o número da parada. Com `porStatus`: aguardando é cheio, aceito é contornado com caminhão, coletado é um ponto menor com marca de confirmação (o nome do pino diz a situação; nunca só cor).
+- Rota: linha `tech-blue` com contorno branco, calculada pelas ruas (`trajeto`), que **se desenha** do começo ao fim (até 1,8 s). Marcador do catador (caminhão em `tech-blue`, com onda suave): quando a posição muda, **desliza pelo trecho de ruas** (entre 0,8 s e 2,2 s). Origem sem catador: casa em `tech-blue`.
+- Movimento reduzido: a rota aparece inteira, o marcador salta e o enquadramento é instantâneo.
+- Sem WebGL ou com erro no estilo ou nos tiles: aviso em região viva ("O mapa não pôde ser carregado. A lista abaixo traz as mesmas informações.") e a lista da tela segue sendo o caminho principal; o mapa nunca é o único meio de agir. Zoom por botões em português e gestos cooperativos (dois dedos) para não prender a rolagem da página.
+- Ciclo de vida: o mapa, os marcadores e as animações são criados e desfeitos em efeitos; com `cacheComponents` as telas escondidas ficam montadas, então o cleanup libera o WebGL e a volta recria tudo (sem instâncias a mais).
+
+## Acompanhamento do pedido (`mapa/mapa-acompanhamento.tsx`)
+
+Mapa baixo no cartão de cada coleta do cidadão: o pino do endereço e, com catador, o marcador dele, a rota pelas ruas até o endereço (passando pelas paradas anteriores **sem mostrar os endereços de outras pessoas**) e o chip "Chega em ~N min" com "É a próxima parada" ou "N paradas antes da sua" e a distância (estimativa). Sem catador: "Assim que um catador aceitar, o caminho até você aparece aqui." A previsão vem de `acompanhar` (`src/lib/acompanhamento.ts`).
 
 ## Parada de rota (`catador/rota.tsx`)
 
-Item de `<ol>` dentro de um `Card`: círculo `tech-blue` com o número (decorativo; o `h3` traz "Parada N:" em `sr-only`), endereço como título, bairro e solicitante, itens, janela de retirada, chip "cerca de N pts" (estimativa) e, só na primeira, chip "Próxima parada" e o botão "Coletado" (com `aria-label` que diz qual parada). As demais mostram "Depois da parada N". Ao coletar, a região viva da tela anuncia "+N pts para <solicitante>", a origem passa a ser a parada coletada e a rota das restantes é recalculada a partir dela.
+Item de `<ol>` dentro de um `Card`: círculo `tech-blue` com o número (decorativo; o `h3` traz "Parada N:" em `sr-only`), endereço como título, bairro e solicitante, itens, janela de retirada, chip "cerca de N pts" (estimativa) e, só na primeira, chip "Próxima parada" e o botão "Coletado" (com `aria-label` que diz qual parada). As demais mostram "Depois da parada N". Ao coletar, a região viva da tela anuncia "+N pts para <solicitante>", a posição do catador passa a ser a parada coletada (guardada no estado) e a rota das restantes é recalculada a partir dela.
 
 ## Regras de implementação que o MVP aprendeu
 

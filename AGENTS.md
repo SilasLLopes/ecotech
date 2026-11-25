@@ -41,6 +41,8 @@ npm test             # node --test em src/lib (reducer, rota, formatação, inva
 npm run build        # build de produção (valida cacheComponents)
 ```
 
+Dados geográficos do mapa (tiles, pontos reais e rotas pelas ruas) são gerados por `scripts/geo/` (à mão, uma vez; ver o README da pasta). `predev` e `prebuild` só copiam o worker do MapLibre para `public/map/`.
+
 Só há testes unitários de `src/lib` (`node --test`, sem dependência nova); testes de interface e e2e seguem em aberto (decisão D-15).
 
 ## Pegadinhas do Next 16 neste repositório
