@@ -56,3 +56,95 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Mapa: pinos hexagonais dos pedidos e marcador do catador. Só tokens da marca. */
+.pino-mapa {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-white);
+  cursor: pointer;
+}
+.pino-mapa:focus-visible {
+  outline: 3px solid var(--color-tech-blue);
+  outline-offset: 2px;
+  border-radius: 9999px;
+}
+.pino-mapa__forma {
+  width: 38px;
+  height: 38px;
+  overflow: visible;
+  filter: drop-shadow(0 2px 3px rgb(32 43 40 / 0.35));
+  transform-origin: 50% 85%;
+  transition: transform 240ms var(--ease-eco);
+  animation: pino-cai 560ms var(--ease-eco) backwards;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+.pino-mapa__forma polygon {
+  fill: var(--color-primary-strong);
+  stroke: var(--color-white);
+  stroke-width: 2.5;
+}
+.pino-mapa[data-selecionado="true"] .pino-mapa__forma {
+  transform: scale(1.28);
+}
+.pino-mapa[data-selecionado="true"] .pino-mapa__forma polygon {
+  fill: var(--color-primary-strong-hover);
+  stroke-width: 3;
+}
+@keyframes pino-cai {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.7);
+  }
+  62% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.catador-mapa {
+  position: relative;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+}
+.catador-mapa__ponto {
+  position: relative;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--color-tech-blue);
+  color: var(--color-white);
+  box-shadow:
+    0 0 0 3px var(--color-white),
+    0 4px 12px rgb(36 120 200 / 0.45);
+}
+.catador-mapa__onda {
+  position: absolute;
+  inset: 5px;
+  border-radius: 9999px;
+  border: 2px solid var(--color-tech-blue);
+  animation: catador-onda 2.2s ease-out infinite;
+}
+@keyframes catador-onda {
+  from {
+    opacity: 0.7;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2);
+  }
+}

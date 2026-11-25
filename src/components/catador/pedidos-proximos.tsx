@@ -51,7 +51,7 @@ export function PedidosProximos() {
 
   if (!catador) return <SemCatador />;
 
-  const origem = catador.origem;
+  const origem = catador.posicao;
   const porDistancia = disponiveis
     .map((pedido) => ({ pedido, dist: distanciaM(origem, pedido.ponto) }))
     .sort((a, b) => a.dist - b.dist);
@@ -129,6 +129,8 @@ export function PedidosProximos() {
               pedidos={disponiveis}
               selecionados={validos}
               rota={temSelecao ? { origem, ordem: rota.ordem } : undefined}
+              posicaoCatador={catador.posicao}
+              altura="alta"
               onSelecionar={alternar}
               rotulo={`Mapa com ${disponiveis.length} ${
                 disponiveis.length === 1 ? "pedido aguardando" : "pedidos aguardando"

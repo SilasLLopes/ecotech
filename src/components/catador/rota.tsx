@@ -173,6 +173,8 @@ export function Rota() {
             <MapaQuixada
               pedidos={paradas}
               rota={{ origem, ordem: rota.ordem }}
+              posicaoCatador={catador.posicao}
+              altura="alta"
               rotulo={`Mapa da rota com ${paradas.length} ${
                 paradas.length === 1 ? "parada" : "paradas"
               } numeradas`}
