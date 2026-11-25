@@ -53,7 +53,8 @@ export function Contador({
     const inicio = performance.now();
     const passo = (agora: number) => {
       const t = (agora - inicio) / DURACAO_MS;
-      setExibido(Math.round(interpolar(de, valor, t)));
+      // No fim mostra o valor exato (pode ter casas decimais); no caminho, inteiros.
+      setExibido(t >= 1 ? valor : Math.round(interpolar(de, valor, t)));
       quadro.current = t < 1 ? requestAnimationFrame(passo) : null;
     };
     quadro.current = requestAnimationFrame(passo);

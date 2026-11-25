@@ -204,6 +204,7 @@ h3 {
 }
 
 .cresce-y {
+  transform-box: fill-box;
   transform-origin: 50% 100%;
   animation: cresce-y var(--duration-slow) var(--ease-eco) backwards;
   animation-delay: calc(var(--i, 0) * 70ms);

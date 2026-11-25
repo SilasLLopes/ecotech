@@ -32,7 +32,7 @@ type Props = {
   porStatus?: boolean;
   onSelecionar?: (id: string) => void;
   rotulo: string;
-  altura?: "baixa" | "media" | "alta" | "cheia";
+  altura?: "baixa" | "media" | "alta" | "cheia" | "preencher";
 };
 
 type Biblioteca = typeof import("maplibre-gl");
@@ -49,6 +49,8 @@ const ALTURAS = {
   media: "h-72 sm:h-80",
   alta: "h-96",
   cheia: "h-[44vh] min-h-64 max-h-[26rem]",
+  // Ocupa a altura da linha da grade (painel da Prefeitura); no celular, 20rem.
+  preencher: "h-80 lg:h-auto lg:min-h-[26rem]",
 } as const;
 
 const TEXTOS_PT = {

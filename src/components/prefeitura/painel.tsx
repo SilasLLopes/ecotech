@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { Chip, type TomChip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Contador } from "@/components/ui/contador";
 import { Icon, type IconeNome } from "@/components/ui/icon";
 import { MapaQuixada } from "@/components/mapa/mapa-quixada";
 import { BAIRROS, COLETAS_POR_SEMANA } from "@/data/seed";
@@ -45,28 +46,27 @@ function indicadores(estado: Estado) {
   };
 }
 
+// Célula da faixa de indicadores: sem cartão nem ícone em círculo, só o número
+// em destaque e o que ele mede. As divisórias vêm da grade (gap de 1px).
 function Indicador({
-  icone,
   rotulo,
   valor,
+  formatar,
   detalhe,
+  className = "",
 }: {
-  icone: IconeNome;
   rotulo: string;
-  valor: string;
+  valor: number;
+  formatar?: (n: number) => string;
   detalhe?: string;
+  className?: string;
 }) {
   return (
-    <Card as="li" className="flex flex-col gap-3">
-      <span className="inline-flex size-10 items-center justify-center rounded-full bg-mint-wash text-primary-strong">
-        <Icon nome={icone} />
-      </span>
-      <div>
-        <p className="text-sm text-text-muted">{rotulo}</p>
-        <p className="text-3xl font-extrabold tabular-nums text-graphite">{valor}</p>
-        {detalhe && <p className="mt-1 text-sm text-text-muted">{detalhe}</p>}
-      </div>
-    </Card>
+    <li className={`flex flex-col gap-1 bg-white p-5 ${className}`}>
+      <p className="text-sm font-medium text-text-muted">{rotulo}</p>
+      <Contador valor={valor} formatar={formatar} className="text-4xl font-extrabold leading-none text-graphite" />
+      {detalhe && <p className="mt-1 text-sm text-text-muted">{detalhe}</p>}
+    </li>
   );
 }
 
@@ -115,12 +115,13 @@ function GraficoColetas() {
         return (
           <g key={s.semana}>
             <rect
+              style={{ "--i": i } as React.CSSProperties}
+              className="cresce-y fill-primary"
               x={x}
               y={y(s.coletas)}
               width={larguraBarra}
               height={base - y(s.coletas)}
               rx={3}
-              className="fill-primary"
             />
             <text
               x={centro}
@@ -194,6 +195,19 @@ export function Painel() {
     },
     { id: "em", rotulo: "Pedido em", celula: (p) => formatarEm(p.criadoEm) },
   ];
+  const ranking = BAIRROS.map((b) => {
+    const deles = estado.pedidos.filter((p) => p.bairro === b.nome && p.status !== "cancelado");
+    const conta = (st: StatusPedido) => deles.filter((p) => p.status === st).length;
+    return {
+      id: b.id,
+      nome: b.nome,
+      total: deles.length,
+      aguardando: conta("aguardando"),
+      aceito: conta("aceito"),
+      coletado: conta("coletado"),
+    };
+  }).sort((x, y) => y.total - x.total);
+  const maiorTotal = Math.max(1, ...ranking.map((b) => b.total));
   const extras = [
     k.total.L > 0 ? `${numero(k.total.L)} L` : null,
     k.total.un > 0 ? `${numero(k.total.un)} ${k.total.un === 1 ? "item" : "itens"}` : null,
@@ -212,26 +226,25 @@ export function Painel() {
         <h2 id={`${uid}-indicadores`} className="sr-only">
           Indicadores
         </h2>
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          <Indicador icone="caminhao" rotulo="Coletas concluídas" valor={numero(k.coletas)} />
+        <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border-soft bg-border-soft shadow-card lg:grid-cols-5">
+          <Indicador rotulo="Coletas concluídas" valor={k.coletas} />
           <Indicador
-            icone="folha"
             rotulo="Material coletado"
-            valor={`${numero(k.total.kg)} kg`}
+            valor={k.total.kg}
+            formatar={(n) => `${numero(n)} kg`}
             detalhe={extras.length > 0 ? `Mais ${extras.join(" e ")}` : undefined}
           />
-          <Indicador icone="trofeu" rotulo="Pontos distribuídos" valor={numero(k.pontos)} />
+          <Indicador rotulo="Pontos distribuídos" valor={k.pontos} />
           <Indicador
-            icone="presente"
             rotulo="Cupons resgatados"
-            valor={numero(k.cupons)}
+            valor={k.cupons}
             detalhe={
               k.solicitacoes === 0
                 ? "Nenhuma solicitação pendente"
                 : `${numero(k.solicitacoes)} ${k.solicitacoes === 1 ? "solicitação de comerciante aguarda" : "solicitações de comerciantes aguardam"} a Prefeitura`
             }
           />
-          <Indicador icone="relogio" rotulo="Aguardando coleta" valor={numero(k.aguardando)} />
+          <Indicador rotulo="Aguardando coleta" valor={k.aguardando} className="col-span-2 lg:col-span-1" />
         </ul>
       </section>
 
@@ -241,29 +254,37 @@ export function Painel() {
             pedidos={estado.pedidos.filter((p) => p.status !== "cancelado")}
             porStatus
             rotulo="Mapa da cidade com os pedidos de coleta por situação"
-            altura="alta"
+            altura="preencher"
           />
-          <Card className="flex flex-col gap-4">
-            <p className="text-sm text-text-muted">
-              Hexágono cheio: aguardando coleta. Hexágono com caminhão: aceito por um
-              catador. Ponto menor com marca de confirmação: já coletado.
-            </p>
-            <ul className="flex flex-col gap-2">
-              {BAIRROS.map((b) => {
-                const deles = estado.pedidos.filter((p) => p.bairro === b.nome);
-                const conta = (s: StatusPedido) => deles.filter((p) => p.status === s).length;
-                return (
-                  <li key={b.id} className="flex items-baseline justify-between gap-3 text-sm">
+          <div className="flex flex-col gap-4 rounded-xl border border-border-soft bg-white p-5 shadow-card">
+            <h3 className="text-lg font-semibold text-graphite">Pedidos por bairro</h3>
+            <ol className="flex flex-col gap-4">
+              {ranking.map((b, i) => (
+                <li key={b.id} className="flex flex-col gap-1.5">
+                  <div className="flex items-baseline justify-between gap-3">
                     <span className="font-semibold text-graphite">{b.nome}</span>
-                    <span className="text-text-muted">
-                      {numero(conta("aguardando"))} aguardando · {numero(conta("aceito"))} aceitos ·{" "}
-                      {numero(conta("coletado"))} coletados
+                    <span className="text-lg font-extrabold tabular-nums text-graphite">
+                      {numero(b.total)}
                     </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </Card>
+                  </div>
+                  <div aria-hidden="true" className="h-2.5 overflow-hidden rounded-full bg-mint-wash">
+                    <div
+                      className="cresce-x h-full rounded-full bg-primary"
+                      style={{ width: `${(b.total / maiorTotal) * 100}%`, "--i": i } as React.CSSProperties}
+                    />
+                  </div>
+                  <p className="text-sm text-text-muted">
+                    {numero(b.aguardando)} aguardando · {numero(b.aceito)} aceitos ·{" "}
+                    {numero(b.coletado)} coletados
+                  </p>
+                </li>
+              ))}
+            </ol>
+            <p className="border-t border-border-soft pt-3 text-sm text-text-muted">
+              No mapa: hexágono cheio é pedido aguardando coleta; com caminhão, aceito por um
+              catador; ponto menor com marca de confirmação, já coletado.
+            </p>
+          </div>
         </div>
       </Secao>
 

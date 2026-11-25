@@ -3,7 +3,9 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
+import { Contador } from "@/components/ui/contador";
+import { ICONE_DO_MATERIAL, Icon } from "@/components/ui/icon";
+import { Revelar } from "@/components/ui/revelar";
 import { CALENDARIO_ROTACAO } from "@/data/seed";
 import { MULTIPLICADOR_MAX, pontosDoPedido } from "@/lib/coleta";
 import { numero } from "@/lib/format";
@@ -146,6 +148,9 @@ export function Rodizio() {
                   >
                     {marcado && <span className="size-2 rounded-full bg-white" />}
                   </span>
+                  <span aria-hidden="true" className="text-primary-strong">
+                    <Icon nome={ICONE_DO_MATERIAL[m.id]} />
+                  </span>
                   <span className="text-base font-semibold text-graphite">{m.nome}</span>
                   <span className="ml-auto shrink-0 whitespace-nowrap text-sm text-text-muted">
                     {numero(m.pontosBase)} pts por {m.unidade}
@@ -170,7 +175,10 @@ export function Rodizio() {
             >
               <Icon nome="menos" />
             </button>
-            <span className="min-w-20 text-center text-2xl font-extrabold tabular-nums text-graphite">
+            <span
+              key={multiplicador}
+              className="pulso-selo min-w-28 text-center text-5xl font-extrabold tabular-nums leading-none text-primary-strong"
+            >
               {fator(multiplicador)}
             </span>
             <button
@@ -198,7 +206,8 @@ export function Rodizio() {
             <span className="sr-only">Multiplicador {fator(multiplicador)}. </span>
             1 {material.unidade} de {material.nome} ={" "}
             <strong className="font-bold text-primary-strong">
-              {numero(pontos(material, multiplicador))} pts com destaque
+              <Contador valor={pontos(material, multiplicador)} formatar={(n) => `${numero(n)} pts`} />{" "}
+              com destaque
             </strong>
             <span className="block text-sm text-text-muted">
               Sem destaque: {numero(pontos(material, 1))} pts. Os pontos são
@@ -237,16 +246,21 @@ export function Rodizio() {
         <p className="text-sm text-text-muted">
           Só para leitura. Mostra como o rodízio poderia seguir nas próximas semanas.
         </p>
-        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {CALENDARIO_ROTACAO.map((s) => (
-            <li key={s.semana}>
-              <Card className="flex h-full flex-col gap-1">
-                <p className="text-sm text-text-muted">Semana de {s.semana}</p>
-                <p className="text-lg font-semibold text-graphite">
-                  {estado.materiais.find((m) => m.id === s.materialId)?.nome ?? "Material"}
-                </p>
-              </Card>
-            </li>
+        <ol className="grid gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+          {CALENDARIO_ROTACAO.map((sem, i) => (
+            <Revelar as="li" key={sem.semana} indice={i} className="relative border-t-2 border-border-soft pt-4">
+              <span
+                aria-hidden="true"
+                className="absolute -top-[7px] left-0 size-3 rounded-full border-2 border-white bg-primary-strong ring-2 ring-primary-soft"
+              />
+              <p className="text-sm text-text-muted">Semana de {sem.semana}</p>
+              <p className="flex items-center gap-2 text-lg font-semibold text-graphite">
+                <span aria-hidden="true" className="text-primary-strong">
+                  <Icon nome={ICONE_DO_MATERIAL[sem.materialId]} />
+                </span>
+                {estado.materiais.find((m) => m.id === sem.materialId)?.nome ?? "Material"}
+              </p>
+            </Revelar>
           ))}
         </ol>
       </section>
