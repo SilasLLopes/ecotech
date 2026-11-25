@@ -38,7 +38,8 @@ function indicadores(estado: Estado) {
     coletas: coletados.length,
     total,
     pontos: coletados.reduce((soma, p) => soma + (p.pontos ?? 0), 0),
-    cupons: estado.resgates.length,
+    cupons: estado.resgates.filter((r) => r.status === "emitido").length,
+    solicitacoes: estado.resgates.filter((r) => r.status === "solicitado").length,
     aguardando: estado.pedidos.filter((p) => p.status === "aguardando").length,
   };
 }
@@ -219,7 +220,16 @@ export function Painel() {
             detalhe={extras.length > 0 ? `Mais ${extras.join(" e ")}` : undefined}
           />
           <Indicador icone="trofeu" rotulo="Pontos distribuídos" valor={numero(k.pontos)} />
-          <Indicador icone="presente" rotulo="Cupons resgatados" valor={numero(k.cupons)} />
+          <Indicador
+            icone="presente"
+            rotulo="Cupons resgatados"
+            valor={numero(k.cupons)}
+            detalhe={
+              k.solicitacoes === 0
+                ? "Nenhuma solicitação pendente"
+                : `${numero(k.solicitacoes)} ${k.solicitacoes === 1 ? "solicitação de comerciante aguarda" : "solicitações de comerciantes aguardam"} a Prefeitura`
+            }
+          />
           <Indicador icone="relogio" rotulo="Aguardando coleta" valor={numero(k.aguardando)} />
         </ul>
       </section>
