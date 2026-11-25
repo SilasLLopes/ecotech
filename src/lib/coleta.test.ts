@@ -15,7 +15,7 @@ function pedido(over: Partial<Pedido> = {}): Pedido {
     itens: [{ materialId: "pet", quantidade: 2 }],
     endereco: "Rua de exemplo, 10",
     bairro: "Centro",
-    ponto: { x: 10, y: 10 },
+    ponto: { lng: -39.01, lat: -4.96 },
     janela: "Hoje, 14h às 16h",
     status: "aguardando",
     criadoEm: "2026-01-01T10:00:00",
@@ -25,7 +25,7 @@ function pedido(over: Partial<Pedido> = {}): Pedido {
 
 function base(): Estado {
   return {
-    versao: 2,
+    versao: 3,
     destaque: { materialId: "pet", multiplicador: 1.25 },
     materiais: [
       { id: "pet", nome: "PET", unidade: "kg", pontosBase: 8 },
@@ -38,7 +38,7 @@ function base(): Estado {
         tipo: "cidadao",
         bairro: "Centro",
         endereco: "Rua de exemplo, 10",
-        ponto: { x: 10, y: 10 },
+        ponto: { lng: -39.01, lat: -4.96 },
         saldo: 100,
         metas: [
           {
@@ -59,7 +59,8 @@ function base(): Estado {
         nome: "Catador de exemplo",
         associadoEm: "2025-01-01",
         coletas: 5,
-        origem: { x: 0, y: 0 },
+        origem: { lng: -39.02, lat: -4.97 },
+        posicao: { lng: -39.02, lat: -4.97 },
       },
     ],
     pedidos: [],
@@ -374,16 +375,14 @@ test("parseEstado rejeita destaque malformado", () => {
   assert.notEqual(parseEstado(com({ materialId: "pet", multiplicador: 1.2 })), null);
 });
 
-test("parseEstado exige a versão 2 e o modelo de público e status", () => {
+test("parseEstado exige a versão 3 e o modelo de público, status e posição", () => {
   const com = (mut: (o: Record<string, unknown>) => void) => {
     const o = JSON.parse(JSON.stringify(reduzir(base(), resgatar))) as Record<string, unknown>;
     mut(o);
     return JSON.stringify(o);
   };
   assert.equal(parseEstado(com((o) => { o.versao = 1; })), null);
-  // Coleção do modelo antigo, que a versão 2 não tem mais.
-  const antiga = ["anun", "cios"].join("");
-  assert.equal(parseEstado(com((o) => { o[antiga] = []; })), null);
+  assert.equal(parseEstado(com((o) => { o.versao = 2; })), null);
   assert.equal(
     parseEstado(com((o) => { delete (o.beneficios as Record<string, unknown>[])[0].publico; })),
     null,
@@ -443,4 +442,26 @@ test("reduzir não muta o estado (Estado congelado, uma ação de cada tipo)", (
 test("parseEstado devolve um Estado serializado igual", () => {
   const e = comPedido(pedido());
   assert.deepEqual(parseEstado(JSON.stringify(e)), e);
+});
+
+test("coletar leva o catador até o ponto da parada coletada", () => {
+  const e = comPedido(aceito());
+  assert.deepEqual(e.catadores[0].posicao, { lng: -39.02, lat: -4.97 });
+  const novo = reduzir(e, coletar);
+  assert.deepEqual(novo.catadores[0].posicao, e.pedidos[0].ponto);
+  // Sem efeito (já coletado) não move o catador nem muda o estado.
+  assert.equal(reduzir(novo, coletar), novo);
+});
+
+test("parseEstado exige posição do catador com latitude e longitude numéricas", () => {
+  const com = (mut: (c: Record<string, unknown>) => void) => {
+    const o = JSON.parse(JSON.stringify(base())) as { catadores: Record<string, unknown>[] };
+    mut(o.catadores[0]);
+    return JSON.stringify(o);
+  };
+  assert.notEqual(parseEstado(com(() => {})), null);
+  assert.equal(parseEstado(com((c) => { delete c.posicao; })), null);
+  assert.equal(parseEstado(com((c) => { c.posicao = { lng: "x", lat: -4.9 }; })), null);
+  assert.equal(parseEstado(com((c) => { c.posicao = { x: 1, y: 2 }; })), null);
+  assert.equal(parseEstado(com((c) => { c.origem = { x: 1, y: 2 }; })), null);
 });

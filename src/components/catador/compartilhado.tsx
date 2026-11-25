@@ -22,8 +22,8 @@ export function SemCatador() {
   );
 }
 
-// "3 paradas, ~420 m, ~25 min (estimativa)". Metros e minutos são estimativas
-// de um mapa esquemático; a distância é arredondada para a dezena.
+// "3 paradas, ~420 m, ~25 min (estimativa)". Metros e minutos vêm do trajeto
+// pelas ruas, mas continuam sendo estimativa; a distância é arredondada para a dezena.
 export function resumoDaRota(
   paradas: number,
   distanciaM: number,

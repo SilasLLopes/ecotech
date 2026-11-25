@@ -106,7 +106,9 @@ export function reduzir(estado: Estado, acao: Acao): Estado {
         ),
         solicitantes,
         catadores: estado.catadores.map((c) =>
-          c.id === acao.catadorId ? { ...c, coletas: c.coletas + 1 } : c,
+          c.id === acao.catadorId
+            ? { ...c, coletas: c.coletas + 1, posicao: pedido.ponto }
+            : c,
         ),
         extrato: [...estado.extrato, ...novosLancamentos],
       };
@@ -239,11 +241,17 @@ const COLECOES = [
   "eventos",
 ] as const;
 
-const CHAVES: string[] = ["versao", "destaque", ...COLECOES];
+// Validação rasa: versão, destaque (tipos dos dois campos), presença das
+// coleções como arrays e, nos itens que mudaram de formato nas últimas versões,
+// só o campo novo: público e status dos benefícios e resgates (versão 2),
+// coordenadas dos catadores (versão 3). Não valida o resto do formato de cada
+// item; chaves extras são ignoradas e uma mudança de modelo sobe a versão.
+const ehPonto = (p: unknown) =>
+  typeof p === "object" &&
+  p !== null &&
+  Number.isFinite((p as Record<string, unknown>).lng) &&
+  Number.isFinite((p as Record<string, unknown>).lat);
 
-// Validação rasa: versão e chaves do modelo, destaque (tipos dos dois campos), presença das coleções como arrays
-// e, nos benefícios e resgates, só o público e o status (campos que a versão 2 introduziu).
-// Não valida o resto do formato de cada item.
 export function parseEstado(raw: string | null): Estado | null {
   if (!raw) return null;
   let dados: unknown;
@@ -256,9 +264,7 @@ export function parseEstado(raw: string | null): Estado | null {
     return null;
   }
   const obj = dados as Record<string, unknown>;
-  if (obj.versao !== 2) return null;
-  // Chave fora do modelo (por exemplo, uma coleção que a versão 2 não tem mais).
-  if (Object.keys(obj).some((chave) => !CHAVES.includes(chave))) return null;
+  if (obj.versao !== 3) return null;
   const destaque = obj.destaque as Record<string, unknown> | null;
   if (typeof destaque !== "object" || destaque === null) return null;
   if (
@@ -282,5 +288,11 @@ export function parseEstado(raw: string | null): Estado | null {
     );
   if (!(obj.beneficios as unknown[]).every(publicoValido)) return null;
   if (!(obj.resgates as unknown[]).every(statusValido)) return null;
+  const catadorValido = (c: unknown) =>
+    typeof c === "object" &&
+    c !== null &&
+    ehPonto((c as Record<string, unknown>).origem) &&
+    ehPonto((c as Record<string, unknown>).posicao);
+  if (!(obj.catadores as unknown[]).every(catadorValido)) return null;
   return obj as unknown as Estado;
 }

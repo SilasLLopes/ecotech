@@ -9,9 +9,11 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { pontosDoPedido } from "@/lib/coleta";
 import { hora, numero } from "@/lib/format";
+import { ROTAS } from "@/data/rotas";
 import { ordenarRota } from "@/lib/route";
+import { minutosDoTrajeto, trajeto } from "@/lib/trajeto";
 import { novoId, obterEstado, useDispatch, useEstado } from "@/lib/store";
-import type { Pedido, Ponto } from "@/lib/types";
+import type { Pedido } from "@/lib/types";
 import {
   descreverItens,
   nomeDoSolicitante,
@@ -25,11 +27,10 @@ export function Rota() {
   const uid = useId();
   const dispatch = useDispatch();
   const catador = useCatador();
-  // Paradas concluídas nesta visita e onde o catador está agora: a rota das
-  // paradas restantes parte da última parada coletada, então a ordem não muda
-  // depois de cada "Coletado".
+  // Paradas concluídas nesta visita. A posição do catador vem do estado: a
+  // rota das paradas restantes parte da última parada coletada, então a ordem
+  // não muda depois de cada "Coletado", nem ao recarregar.
   const [concluidas, setConcluidas] = useState<{ id: string; pontos: number }[]>([]);
-  const [posicao, setPosicao] = useState<Ponto | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const confirmacao = useRef<HTMLParagraphElement>(null);
 
@@ -39,7 +40,6 @@ export function Rota() {
   useEffect(
     () => () => {
       setConcluidas([]);
-      setPosicao(null);
       setFeedback(null);
     },
     [],
@@ -60,7 +60,7 @@ export function Rota() {
   const aceitos = estado.pedidos.filter(
     (p) => p.status === "aceito" && p.catadorId === catador.id,
   );
-  const origem = posicao ?? catador.origem;
+  const origem = catador.posicao;
   const rota = ordenarRota(
     origem,
     aceitos.map((p) => ({ id: p.id, ponto: p.ponto })),
@@ -68,6 +68,8 @@ export function Rota() {
   const paradas = rota.ordem
     .map((id) => aceitos.find((p) => p.id === id))
     .filter((p): p is Pedido => Boolean(p));
+  const percurso = trajeto([origem, ...paradas.map((p) => p.ponto)], ROTAS);
+  const minutos = minutosDoTrajeto(percurso.segundos, paradas.length);
 
   function coletar(pedido: Pedido) {
     if (!catador) return;
@@ -98,7 +100,6 @@ export function Rota() {
     }
     const pts = coletado.pontos ?? 0;
     setConcluidas((atual) => [...atual, { id: pedido.id, pontos: pts }]);
-    setPosicao(pedido.ponto);
     setFeedback({
       ok: true,
       texto: `+${numero(pts)} pts para ${nomeDoSolicitante(depois, coletado)}`,
@@ -177,7 +178,7 @@ export function Rota() {
               } numeradas`}
             />
             <p className="text-base font-semibold text-graphite">
-              {resumoDaRota(paradas.length, rota.distanciaM, rota.minutos)}
+              {resumoDaRota(paradas.length, percurso.distanciaM, minutos)}
             </p>
           </Card>
 

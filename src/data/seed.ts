@@ -2,7 +2,8 @@
 // pontos, estoques e séries. Nenhum número representa dado real nem regra
 // definida (D-04 segue aberto). As telas devem marcar como "Dados de exemplo".
 // Horários são strings fixas: nada aqui chama Date durante a renderização.
-// Cenário: Quixadá (CE), mapa ilustrativo de 400 x 300 (1 unidade = 10 m).
+// Cenário: Quixadá (CE). Coordenadas e nomes de rua vêm do OpenStreetMap
+// (src/data/pontos-geo.json); número da casa, pessoas e comércios são fictícios.
 
 import type { Estado, MaterialId, Ponto } from "../lib/types";
 
@@ -12,53 +13,20 @@ export const DEMO = {
   catador: "c-joao",
 } as const;
 
-export type BairroMapa = {
-  id: string;
-  nome: string;
-  poligono: string;
-  rotulo: Ponto;
-};
+export type BairroMapa = { id: string; nome: string; centro: Ponto };
 
-export const MAPA: {
-  largura: 400;
-  altura: 300;
-  bairros: BairroMapa[];
-} = {
-  largura: 400,
-  altura: 300,
-  bairros: [
-    {
-      id: "campo-velho",
-      nome: "Campo Velho",
-      poligono: "20,20 200,20 210,130 20,130",
-      rotulo: { x: 110, y: 112 },
-    },
-    {
-      id: "planalto-universitario",
-      nome: "Planalto Universitário",
-      poligono: "220,20 380,20 380,130 230,130",
-      rotulo: { x: 300, y: 112 },
-    },
-    {
-      id: "alto-sao-francisco",
-      nome: "Alto São Francisco",
-      poligono: "20,150 90,150 90,280 30,280",
-      rotulo: { x: 55, y: 268 },
-    },
-    {
-      id: "centro",
-      nome: "Centro",
-      poligono: "100,150 280,150 280,260 100,260",
-      rotulo: { x: 190, y: 246 },
-    },
-    {
-      id: "combate",
-      nome: "Combate",
-      poligono: "290,150 380,150 380,280 300,280",
-      rotulo: { x: 340, y: 268 },
-    },
-  ],
-};
+// Bairros de exemplo (nomes de Quixadá), cada um com um ponto de referência no
+// meio dos pontos do seed. Sem limites oficiais: o mapa vem do OpenStreetMap.
+export const BAIRROS: BairroMapa[] = [
+  { id: "campo-velho", nome: "Campo Velho", centro: { lng: -39.009955, lat: -4.962929 } },
+  { id: "planalto-universitario", nome: "Planalto Universitário", centro: { lng: -39.026598, lat: -4.967553 } },
+  { id: "alto-sao-francisco", nome: "Alto São Francisco", centro: { lng: -39.006526, lat: -4.966252 } },
+  { id: "centro", nome: "Centro", centro: { lng: -39.014929, lat: -4.972332 } },
+  { id: "combate", nome: "Combate", centro: { lng: -39.025889, lat: -4.971856 } },
+];
+
+// Caixa da mancha urbana de Quixadá usada pelas invariantes do seed.
+export const AREA_URBANA = { oeste: -39.045, sul: -4.99, leste: -38.985, norte: -4.945 };
 
 // Série de exemplo (fora do Estado): coletas concluídas por semana.
 export const COLETAS_POR_SEMANA: { semana: string; coletas: number }[] = [
@@ -109,9 +77,9 @@ const METAS_PADRAO = () => [
 // - pontos dos pedidos coletados = pontosDoPedido com o destaque abaixo;
 // - saldo de cada solicitante = soma do extrato dele (Ana: 4 coletas + 4 bônus
 //   diários; Mercadinho: 3 coletas, sem metas; Carlos: sem histórico, saldo 0);
-// - ids únicos; pontos dos pedidos dentro do polígono do bairro.
+// - ids únicos; pontos dentro da área urbana (AREA_URBANA) e iguais a pontos reais de pontos-geo.json.
 export const ESTADO_INICIAL: Estado = {
-  versao: 2,
+  versao: 3,
   destaque: { materialId: "pet", multiplicador: 1.25 },
   materiais: [
     { id: "pet", nome: "PET", unidade: "kg", pontosBase: 8 },
@@ -127,8 +95,8 @@ export const ESTADO_INICIAL: Estado = {
       nome: "Ana Beatriz Lima",
       tipo: "cidadao",
       bairro: "Centro",
-      endereco: "Rua Coronel Aurélio Matos, 120",
-      ponto: { x: 170, y: 190 },
+      endereco: "Rua Oscar Barbosa, 120",
+      ponto: { lng: -39.015, lat: -4.971836 },
       saldo: 140,
       metas: [
         { ...METAS_PADRAO()[0] },
@@ -140,8 +108,8 @@ export const ESTADO_INICIAL: Estado = {
       nome: "Mercadinho Bom Preço",
       tipo: "comerciante",
       bairro: "Campo Velho",
-      endereco: "Avenida Dom Aureliano Neto, 480",
-      ponto: { x: 110, y: 80 },
+      endereco: "Rua Dom Lucas, 480",
+      ponto: { lng: -39.009934, lat: -4.96426 },
       saldo: 155,
       metas: [],
     },
@@ -150,8 +118,8 @@ export const ESTADO_INICIAL: Estado = {
       nome: "Carlos Eduardo Rocha",
       tipo: "cidadao",
       bairro: "Alto São Francisco",
-      endereco: "Travessa das Mangueiras, 35",
-      ponto: { x: 50, y: 210 },
+      endereco: "Rua Benigno Bezerra, 35",
+      ponto: { lng: -39.007244, lat: -4.965513 },
       saldo: 0,
       metas: METAS_PADRAO(),
     },
@@ -162,28 +130,32 @@ export const ESTADO_INICIAL: Estado = {
       nome: "João Batista",
       associadoEm: "2024-03-12",
       coletas: 37,
-      origem: { x: 150, y: 170 },
+      origem: { lng: -39.017484, lat: -4.97368 },
+      posicao: { lng: -39.017484, lat: -4.97368 },
     },
     {
       id: "c-francisca",
       nome: "Francisca Lima",
       associadoEm: "2023-08-05",
       coletas: 52,
-      origem: { x: 60, y: 190 },
+      origem: { lng: -39.005809, lat: -4.966992 },
+      posicao: { lng: -39.005809, lat: -4.966992 },
     },
     {
       id: "c-raimundo",
       nome: "Raimundo Alves",
       associadoEm: "2024-09-21",
       coletas: 29,
-      origem: { x: 260, y: 90 },
+      origem: { lng: -39.028036, lat: -4.967476 },
+      posicao: { lng: -39.028036, lat: -4.967476 },
     },
     {
       id: "c-luciana",
       nome: "Luciana Sousa",
       associadoEm: "2025-01-30",
       coletas: 41,
-      origem: { x: 330, y: 200 },
+      origem: { lng: -39.027069, lat: -4.972878 },
+      posicao: { lng: -39.027069, lat: -4.972878 },
     },
   ],
   pedidos: [
@@ -195,9 +167,9 @@ export const ESTADO_INICIAL: Estado = {
         { materialId: "pet", quantidade: 3 },
         { materialId: "papelao", quantidade: 2 },
       ],
-      endereco: "Rua Coronel Aurélio Matos, 120",
+      endereco: "Rua Oscar Barbosa, 120",
       bairro: "Centro",
-      ponto: { x: 170, y: 190 },
+      ponto: { lng: -39.015, lat: -4.971836 },
       janela: "14h às 16h",
       status: "coletado",
       catadorId: "c-joao",
@@ -211,9 +183,9 @@ export const ESTADO_INICIAL: Estado = {
         { materialId: "latas", quantidade: 1.5 },
         { materialId: "vidro", quantidade: 2 },
       ],
-      endereco: "Rua Coronel Aurélio Matos, 120",
+      endereco: "Rua Oscar Barbosa, 120",
       bairro: "Centro",
-      ponto: { x: 170, y: 190 },
+      ponto: { lng: -39.015, lat: -4.971836 },
       janela: "9h às 11h",
       status: "coletado",
       catadorId: "c-francisca",
@@ -227,9 +199,9 @@ export const ESTADO_INICIAL: Estado = {
         { materialId: "pet", quantidade: 2 },
         { materialId: "oleo", quantidade: 1 },
       ],
-      endereco: "Rua Coronel Aurélio Matos, 120",
+      endereco: "Rua Oscar Barbosa, 120",
       bairro: "Centro",
-      ponto: { x: 170, y: 190 },
+      ponto: { lng: -39.015, lat: -4.971836 },
       janela: "14h às 16h",
       status: "coletado",
       catadorId: "c-joao",
@@ -240,9 +212,9 @@ export const ESTADO_INICIAL: Estado = {
       id: "p-004",
       solicitanteId: "s-ana",
       itens: [{ materialId: "papelao", quantidade: 7 }],
-      endereco: "Rua Coronel Aurélio Matos, 120",
+      endereco: "Rua Oscar Barbosa, 120",
       bairro: "Centro",
-      ponto: { x: 170, y: 190 },
+      ponto: { lng: -39.015, lat: -4.971836 },
       janela: "16h às 18h",
       status: "coletado",
       catadorId: "c-francisca",
@@ -257,9 +229,9 @@ export const ESTADO_INICIAL: Estado = {
         { materialId: "pet", quantidade: 4 },
         { materialId: "vidro", quantidade: 5 },
       ],
-      endereco: "Avenida Dom Aureliano Neto, 480",
+      endereco: "Rua Dom Lucas, 480",
       bairro: "Campo Velho",
-      ponto: { x: 110, y: 80 },
+      ponto: { lng: -39.009934, lat: -4.96426 },
       janela: "Hoje, 10h às 12h",
       status: "coletado",
       catadorId: "c-raimundo",
@@ -273,9 +245,9 @@ export const ESTADO_INICIAL: Estado = {
         { materialId: "latas", quantidade: 3 },
         { materialId: "papelao", quantidade: 6 },
       ],
-      endereco: "Avenida Dom Aureliano Neto, 480",
+      endereco: "Rua Dom Lucas, 480",
       bairro: "Campo Velho",
-      ponto: { x: 110, y: 80 },
+      ponto: { lng: -39.009934, lat: -4.96426 },
       janela: "Hoje, 10h às 12h",
       status: "coletado",
       catadorId: "c-joao",
@@ -286,9 +258,9 @@ export const ESTADO_INICIAL: Estado = {
       id: "p-013",
       solicitanteId: "s-mercadinho",
       itens: [{ materialId: "oleo", quantidade: 4 }],
-      endereco: "Avenida Dom Aureliano Neto, 480",
+      endereco: "Rua Dom Lucas, 480",
       bairro: "Campo Velho",
-      ponto: { x: 110, y: 80 },
+      ponto: { lng: -39.009934, lat: -4.96426 },
       janela: "Hoje, 14h às 16h",
       status: "coletado",
       catadorId: "c-raimundo",
@@ -303,9 +275,9 @@ export const ESTADO_INICIAL: Estado = {
         { materialId: "pet", quantidade: 4 },
         { materialId: "latas", quantidade: 3 },
       ],
-      endereco: "Avenida Dom Aureliano Neto, 480",
+      endereco: "Rua Dom Lucas, 480",
       bairro: "Campo Velho",
-      ponto: { x: 110, y: 80 },
+      ponto: { lng: -39.009934, lat: -4.96426 },
       janela: "Hoje, 10h às 12h",
       status: "aceito",
       catadorId: "c-joao",
@@ -319,9 +291,9 @@ export const ESTADO_INICIAL: Estado = {
         { materialId: "pet", quantidade: 6 },
         { materialId: "papelao", quantidade: 10 },
       ],
-      endereco: "Rua das Oiticicas, 72",
+      endereco: "Rua Jardim Primavera, 72",
       bairro: "Campo Velho",
-      ponto: { x: 150, y: 50 },
+      ponto: { lng: -39.009976, lat: -4.961597 },
       janela: "Hoje, 14h às 16h",
       status: "aguardando",
       criadoEm: "2026-11-24T08:10:00",
@@ -333,9 +305,9 @@ export const ESTADO_INICIAL: Estado = {
         { materialId: "vidro", quantidade: 4 },
         { materialId: "latas", quantidade: 2 },
       ],
-      endereco: "Travessa das Mangueiras, 35",
+      endereco: "Rua Benigno Bezerra, 35",
       bairro: "Alto São Francisco",
-      ponto: { x: 50, y: 210 },
+      ponto: { lng: -39.007244, lat: -4.965513 },
       janela: "Hoje, 16h às 18h",
       status: "aguardando",
       criadoEm: "2026-11-24T08:25:00",
@@ -344,9 +316,9 @@ export const ESTADO_INICIAL: Estado = {
       id: "p-008",
       solicitanteId: "s-carlos",
       itens: [{ materialId: "eletronicos", quantidade: 3 }],
-      endereco: "Rua Professora Lúcia Maia, 55",
+      endereco: "Avenida Francisco Pinheiro de Almeida, 55",
       bairro: "Planalto Universitário",
-      ponto: { x: 310, y: 70 },
+      ponto: { lng: -39.025161, lat: -4.967629 },
       janela: "Amanhã, 9h às 11h",
       status: "aguardando",
       criadoEm: "2026-11-24T08:40:00",
@@ -355,9 +327,9 @@ export const ESTADO_INICIAL: Estado = {
       id: "p-009",
       solicitanteId: "s-mercadinho",
       itens: [{ materialId: "oleo", quantidade: 8 }],
-      endereco: "Rua do Galpão Velho, 210",
+      endereco: "Rua Francisco Segundo Costa, 210",
       bairro: "Combate",
-      ponto: { x: 340, y: 210 },
+      ponto: { lng: -39.024709, lat: -4.970834 },
       janela: "Hoje, 14h às 16h",
       status: "aguardando",
       criadoEm: "2026-11-24T08:55:00",
@@ -369,9 +341,9 @@ export const ESTADO_INICIAL: Estado = {
         { materialId: "papelao", quantidade: 5 },
         { materialId: "pet", quantidade: 2 },
       ],
-      endereco: "Rua Doutor Epitácio Barros, 300",
+      endereco: "Rua Autran Moreno, 300",
       bairro: "Centro",
-      ponto: { x: 230, y: 190 },
+      ponto: { lng: -39.012303, lat: -4.971479 },
       janela: "Hoje, 16h às 18h",
       status: "aguardando",
       criadoEm: "2026-11-24T09:05:00",

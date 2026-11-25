@@ -10,7 +10,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { pontosDoPedido } from "@/lib/coleta";
 import { formatarEm, numero } from "@/lib/format";
+import { ROTAS } from "@/data/rotas";
 import { distanciaM, ordenarRota } from "@/lib/route";
+import { minutosDoTrajeto, trajeto } from "@/lib/trajeto";
 import { obterEstado, useDispatch, useEstado } from "@/lib/store";
 import {
   descreverItens,
@@ -58,6 +60,11 @@ export function PedidosProximos() {
     origem,
     escolhidos.map((p) => ({ id: p.id, ponto: p.ponto })),
   );
+  const percurso = trajeto(
+    [origem, ...rota.ordem.flatMap((id) => escolhidos.find((p) => p.id === id)?.ponto ?? [])],
+    ROTAS,
+  );
+  const minutos = minutosDoTrajeto(percurso.segundos, escolhidos.length);
   const temSelecao = escolhidos.length > 0;
 
   function alternar(id: string) {
@@ -220,7 +227,7 @@ export function PedidosProximos() {
           <div className="pointer-events-auto flex flex-col gap-2 border-t border-border-soft bg-white px-4 py-3 shadow-raised">
             <p id={`${uid}-resumo-rota`} aria-live="polite" className="text-base font-semibold text-graphite">
               {temSelecao
-                ? resumoDaRota(escolhidos.length, rota.distanciaM, rota.minutos)
+                ? resumoDaRota(escolhidos.length, percurso.distanciaM, minutos)
                 : "Selecione pedidos para montar a rota"}
             </p>
             <Button

@@ -1,19 +1,24 @@
 import type { Ponto } from "./types";
 
-// 1 unidade do mapa = 10 m (valor de exemplo do mapa ilustrativo).
-const METROS_POR_UNIDADE = 10;
-// Valores de exemplo: carrinho a 60 m/min e 4 min por parada.
-const METROS_POR_MINUTO = 60;
-const MINUTOS_POR_PARADA = 4;
+const RAIO_TERRA_M = 6371000;
+const paraRad = (graus: number) => (graus * Math.PI) / 180;
 
+// Distância em linha reta sobre a esfera (haversine), em metros.
 export function distanciaM(a: Ponto, b: Ponto): number {
-  return Math.hypot(a.x - b.x, a.y - b.y) * METROS_POR_UNIDADE;
+  const dLat = paraRad(b.lat - a.lat);
+  const dLng = paraRad(b.lng - a.lng);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(paraRad(a.lat)) * Math.cos(paraRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * RAIO_TERRA_M * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
+// Ordem das paradas por vizinho mais próximo a partir da origem. A distância e
+// o tempo de verdade vêm de `trajeto` (rota pelas ruas); aqui só se decide a ordem.
 export function ordenarRota(
   origem: Ponto,
   paradas: { id: string; ponto: Ponto }[],
-): { ordem: string[]; distanciaM: number; minutos: number } {
+): { ordem: string[]; distanciaM: number } {
   const restantes = [...paradas];
   const ordem: string[] = [];
   let atual = origem;
@@ -36,8 +41,5 @@ export function ordenarRota(
     atual = escolhida.ponto;
   }
 
-  const minutos = Math.round(
-    total / METROS_POR_MINUTO + MINUTOS_POR_PARADA * paradas.length,
-  );
-  return { ordem, distanciaM: total, minutos };
+  return { ordem, distanciaM: total };
 }

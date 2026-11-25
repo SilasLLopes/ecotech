@@ -1,31 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ESTADO_INICIAL, MAPA } from "../data/seed.ts";
+import { AREA_URBANA, BAIRROS, ESTADO_INICIAL } from "../data/seed.ts";
+import pontosGeo from "../data/pontos-geo.json" with { type: "json" };
+import rotasJson from "../data/rotas.json" with { type: "json" };
 import { parseEstado, pontosDoPedido } from "./coleta.ts";
-import type { Ponto } from "./types.ts";
+import { chavePonto } from "./trajeto.ts";
+import type { Ponto, Rotas } from "./types.ts";
 
 const e = ESTADO_INICIAL;
+const rotas = rotasJson as unknown as Rotas;
 
 function repetidos(ids: string[]): string[] {
   return ids.filter((id, i) => ids.indexOf(id) !== i);
-}
-
-// Ray casting; "x,y x,y ..." é o formato de BairroMapa.poligono.
-function dentro(ponto: Ponto, poligono: string): boolean {
-  const vs = poligono.split(/\s+/).map((par) => {
-    const [x, y] = par.split(",").map(Number);
-    return { x, y };
-  });
-  let inside = false;
-  for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-    const a = vs[i];
-    const b = vs[j];
-    const cruza =
-      a.y > ponto.y !== b.y > ponto.y &&
-      ponto.x < ((b.x - a.x) * (ponto.y - a.y)) / (b.y - a.y) + a.x;
-    if (cruza) inside = !inside;
-  }
-  return inside;
 }
 
 test("saldo de cada solicitante é a soma do seu extrato", () => {
@@ -96,15 +82,66 @@ test("pedidos aceitos e coletados têm catador; aguardando não tem", () => {
   }
 });
 
-test("cada ponto de pedido e de solicitante cai dentro do seu bairro no mapa", () => {
-  const bairros = new Map(MAPA.bairros.map((b) => [b.nome, b.poligono]));
-  const conferir = (rotulo: string, bairro: string, ponto: Ponto) => {
-    const poligono = bairros.get(bairro);
-    assert.ok(poligono, `${rotulo}: bairro "${bairro}" não está no MAPA`);
-    assert.ok(dentro(ponto, poligono), `${rotulo}: ponto fora de ${bairro}`);
-  };
-  for (const p of e.pedidos) conferir(p.id, p.bairro, p.ponto);
-  for (const s of e.solicitantes) conferir(s.id, s.bairro, s.ponto);
+const emArea = (p: Ponto) =>
+  p.lng >= AREA_URBANA.oeste &&
+  p.lng <= AREA_URBANA.leste &&
+  p.lat >= AREA_URBANA.sul &&
+  p.lat <= AREA_URBANA.norte;
+
+function pontosDoSeed(): { rotulo: string; ponto: Ponto; endereco?: string }[] {
+  return [
+    ...e.pedidos.map((p) => ({ rotulo: p.id, ponto: p.ponto, endereco: p.endereco })),
+    ...e.solicitantes.map((s) => ({ rotulo: s.id, ponto: s.ponto, endereco: s.endereco })),
+    ...e.catadores.flatMap((c) => [
+      { rotulo: `${c.id} origem`, ponto: c.origem },
+      { rotulo: `${c.id} posição`, ponto: c.posicao },
+    ]),
+  ];
+}
+
+test("todo ponto do seed fica dentro da área urbana de Quixadá", () => {
+  for (const { rotulo, ponto } of pontosDoSeed()) {
+    assert.ok(emArea(ponto), `${rotulo}: ponto fora da área urbana`);
+  }
+  for (const b of BAIRROS) assert.ok(emArea(b.centro), `bairro ${b.nome}`);
+});
+
+test("todo bairro citado pelo seed existe em BAIRROS", () => {
+  const nomes = new Set(BAIRROS.map((b) => b.nome));
+  for (const p of e.pedidos) assert.ok(nomes.has(p.bairro), `${p.id}: ${p.bairro}`);
+  for (const s of e.solicitantes) assert.ok(nomes.has(s.bairro), `${s.id}: ${s.bairro}`);
+});
+
+test("todo ponto do seed é um ponto real de pontos-geo.json, e o endereço traz o nome da rua", () => {
+  const porChave = new Map(pontosGeo.map((g) => [chavePonto(g), g]));
+  for (const { rotulo, ponto, endereco } of pontosDoSeed()) {
+    const geo = porChave.get(chavePonto(ponto));
+    assert.ok(geo, `${rotulo}: ponto não está em pontos-geo.json`);
+    if (endereco) {
+      assert.ok(
+        endereco.startsWith(`${geo.rua}, `),
+        `${rotulo}: endereço "${endereco}" deveria começar por "${geo.rua}, "`,
+      );
+    }
+  }
+});
+
+test("todo ponto do seed tem rota guardada para todos os outros", () => {
+  const chaves = new Set(pontosDoSeed().map((x) => chavePonto(x.ponto)));
+  const porChave = new Map(
+    Object.entries(rotas.pontos).map(([id, p]) => [chavePonto(p), id]),
+  );
+  const ids = [...chaves].map((c) => {
+    const id = porChave.get(c);
+    assert.ok(id, `ponto ${c} não está em rotas.json`);
+    return id;
+  });
+  for (const a of ids) {
+    for (const b of ids) {
+      if (a === b) continue;
+      assert.ok(rotas.trechos[`${a}>${b}`], `faltam o trecho ${a}>${b}`);
+    }
+  }
 });
 
 test("todo benefício tem público válido e há ao menos um ativo de cada público", () => {
@@ -135,8 +172,8 @@ test("resgates do seed ligam benefício e solicitante do mesmo público", () => 
   }
 });
 
-test("o seed é um estado da versão 2 e passa por parseEstado", () => {
-  assert.equal(e.versao, 2);
+test("o seed é um estado da versão 3 e passa por parseEstado", () => {
+  assert.equal(e.versao, 3);
   assert.deepEqual(Object.keys(e).sort(), [
     "beneficios",
     "catadores",

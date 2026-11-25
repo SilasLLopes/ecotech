@@ -1,7 +1,8 @@
 // Tipos do domínio de coleta. Só sintaxe apagável (sem enum).
 // Todos os dados de seed são de exemplo.
 
-export type Ponto = { x: number; y: number };
+// Coordenadas geográficas reais (graus decimais).
+export type Ponto = { lng: number; lat: number };
 
 export type MaterialId =
   | "pet"
@@ -63,6 +64,9 @@ export type Catador = {
   associadoEm: string;
   coletas: number;
   origem: Ponto;
+  // Onde o catador está agora: a origem até a primeira coleta, depois o ponto
+  // da última parada coletada.
+  posicao: Ponto;
 };
 
 // Quem pode resgatar: bate com Solicitante.tipo.
@@ -111,7 +115,7 @@ export type Evento = {
 export type Destaque = { materialId: MaterialId; multiplicador: number };
 
 export type Estado = {
-  versao: 2;
+  versao: 3;
   destaque: Destaque;
   materiais: Material[];
   solicitantes: Solicitante[];
@@ -143,3 +147,13 @@ export type Acao =
   | { type: "alternar-beneficio"; id: string }
   | { type: "criar-evento"; evento: Evento }
   | { type: "conceder-resgate"; id: string };
+
+// Trechos de rota pelas ruas, pré-calculados (scripts/geo/build-rotas.mjs).
+// `pontos` liga o id de cada ponto de exemplo às suas coordenadas; `trechos` é
+// indexado por "idA>idB" com distância em metros, duração a pé em segundos e a
+// geometria como lista de [lng, lat].
+export type Trecho = { d: number; s: number; g: [number, number][] };
+export type Rotas = {
+  pontos: Record<string, Ponto>;
+  trechos: Record<string, Trecho>;
+};
