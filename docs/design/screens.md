@@ -100,7 +100,7 @@ Logo vertical, assinatura e quatro cartões de perfil (Cidadão, Comerciante, Ca
 
 ### Cidadão (`/cidadao`)
 
-Navegação inferior: Início · Coletar · Recompensas · Eventos. Usuária de exemplo: Ana Beatriz Lima.
+Navegação inferior: Início · Reciclar · Recompensas · Eventos. Usuária de exemplo: Ana Beatriz Lima.
 
 | Rota | O que mostra | Estados |
 |---|---|---|
@@ -111,7 +111,7 @@ Navegação inferior: Início · Coletar · Recompensas · Eventos. Usuária de 
 
 ### Comerciante (`/comerciante`)
 
-Navegação inferior: Início · Coletar · Benefícios · Eventos. Comércio de exemplo: Mercadinho Bom Preço (saldo de exemplo vindo de três coletas no histórico). `/comerciante`, `/comerciante/coletar` e `/comerciante/beneficios` reutilizam as telas do cidadão com textos de comércio (sem metas). A frase do perfil na entrada ("Marque o material do comércio e conquiste benefícios da Prefeitura") foi escrita pela implementação e aguarda confirmação do responsável do projeto.
+Navegação inferior: Início · Reciclar · Benefícios · Eventos. Comércio de exemplo: Mercadinho Bom Preço (saldo de exemplo vindo de três coletas no histórico). `/comerciante`, `/comerciante/coletar` e `/comerciante/beneficios` reutilizam as telas do cidadão com textos de comércio (sem metas). A frase do perfil na entrada ("Marque o material do comércio e conquiste benefícios da Prefeitura") foi escrita pela implementação e aguarda confirmação do responsável do projeto.
 
 | Rota | O que mostra | Estados |
 |---|---|---|
