@@ -76,6 +76,15 @@ const CAMADAS_OCULTAS = new Set(["pois", "roads_shields"]);
 export const COR_ROTA = "#2478C8"; // tech-blue: a conexão entre as paradas
 export const COR_ROTA_CONTORNO = "#FFFFFF"; // white
 
+// Rampa do mapa de calor (da menor para a maior concentração), só em verdes da
+// marca até o grafite: primary-soft → primary → primary-strong → graphite.
+export const RAMPA_CALOR = [
+  "#A7E8C2", // primary-soft
+  "#16A36A", // primary
+  "#126B4A", // primary-strong
+  "#202B28", // graphite
+] as const;
+
 export const ATRIBUICAO =
   '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a> · <a href="https://protomaps.com" target="_blank" rel="noreferrer">Protomaps</a>';
 

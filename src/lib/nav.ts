@@ -35,7 +35,7 @@ export const PERFIS: Record<
   },
   prefeitura: {
     rotulo: "Prefeitura",
-    frase: "Gerencie o rodízio e os benefícios",
+    frase: "Veja onde a cidade mais recicla e guie o rodízio",
     icone: "grafico",
     raiz: "/prefeitura",
   },
@@ -60,6 +60,7 @@ export const NAV: Record<Perfil, ItemNav[]> = {
   ],
   prefeitura: [
     { href: "/prefeitura", rotulo: "Painel", icone: "grafico" },
+    { href: "/prefeitura/mapa", rotulo: "Mapa", icone: "pino" },
     { href: "/prefeitura/rodizio", rotulo: "Rodízio", icone: "relogio" },
     { href: "/prefeitura/beneficios", rotulo: "Benefícios", icone: "presente" },
     { href: "/prefeitura/eventos", rotulo: "Eventos", icone: "calendario" },

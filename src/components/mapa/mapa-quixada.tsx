@@ -13,7 +13,8 @@ import { ateFracao, easeSuave, pontoNaFracao, type Coord } from "@/lib/percurso"
 import { trajeto } from "@/lib/trajeto";
 import type { Pedido, Ponto } from "@/lib/types";
 import { atualizarPino, criarMarcadorCatador, criarPino } from "./marcadores";
-import { COR_ROTA, COR_ROTA_CONTORNO, estiloQuixada } from "./estilo-quixada";
+import { COR_ROTA, COR_ROTA_CONTORNO, RAMPA_CALOR, estiloQuixada } from "./estilo-quixada";
+import type { PontoCalor } from "@/lib/calor";
 
 // Mapa real de Quixadá (MapLibre + tiles do OpenStreetMap hospedados em /map/),
 // que funciona sem internet. É reforço visual: a lista da tela continua sendo o
@@ -30,6 +31,9 @@ type Props = {
   posicaoCatador?: Ponto;
   // Mapa da cidade: o pino mostra a situação do pedido (só leitura).
   porStatus?: boolean;
+  // Mapa de calor: concentração de doações (peso de cada ponto; `maximo` é o
+  // peso que vira a cor mais quente).
+  calor?: { pontos: PontoCalor[]; maximo: number };
   onSelecionar?: (id: string) => void;
   rotulo: string;
   altura?: "baixa" | "media" | "alta" | "cheia" | "preencher";
@@ -50,7 +54,7 @@ const ALTURAS = {
   alta: "h-96",
   cheia: "h-[44vh] min-h-64 max-h-[26rem]",
   // Ocupa a altura da linha da grade (painel da Prefeitura); no celular, 20rem.
-  preencher: "h-80 lg:h-auto lg:min-h-[26rem]",
+  preencher: "h-80 lg:h-auto lg:min-h-[26rem] lg:flex-1",
 } as const;
 
 const TEXTOS_PT = {
@@ -89,6 +93,8 @@ async function prepararBiblioteca(ml: Biblioteca) {
 const FONTE_ROTA = "rota";
 const LINHA_COM_CONTORNO = "rota-contorno";
 const LINHA_ROTA = "rota-linha";
+const FONTE_CALOR = "calor";
+const CAMADA_CALOR = "calor-camada";
 
 function geojson(coords: Coord[]) {
   return {
@@ -106,6 +112,7 @@ export function MapaQuixada({
   rota,
   posicaoCatador,
   porStatus = false,
+  calor,
   onSelecionar,
   rotulo,
   altura = "media",
@@ -303,6 +310,70 @@ export function MapaQuixada({
     animacaoRota.current = requestAnimationFrame(quadro);
   }, [mapa, lib, pedidos, rota]);
 
+  // Mapa de calor: camada de densidade abaixo dos rótulos, com a rampa da marca.
+  useEffect(() => {
+    if (!mapa || !lib) return;
+    if (!calor) {
+      if (mapa.getLayer(CAMADA_CALOR)) mapa.removeLayer(CAMADA_CALOR);
+      if (mapa.getSource(FONTE_CALOR)) mapa.removeSource(FONTE_CALOR);
+      return;
+    }
+    const dados = {
+      type: "FeatureCollection" as const,
+      features: calor.pontos.map((p) => ({
+        type: "Feature" as const,
+        properties: { peso: p.peso },
+        geometry: { type: "Point" as const, coordinates: [p.lng, p.lat] },
+      })),
+    };
+    // Expressões de estilo do MapLibre: o tipo exato mora num pacote transitivo, então
+    // entram como `unknown` e são convertidas onde o MapLibre as recebe.
+    const peso = [
+      "interpolate",
+      ["linear"],
+      ["get", "peso"],
+      0,
+      0,
+      Math.max(1, calor.maximo),
+      1,
+    ] as unknown;
+    const existente = mapa.getSource(FONTE_CALOR) as GeoJSONSource | undefined;
+    if (existente) {
+      existente.setData(dados);
+      mapa.setPaintProperty(CAMADA_CALOR, "heatmap-weight", peso as never);
+      return;
+    }
+    mapa.addSource(FONTE_CALOR, { type: "geojson", data: dados });
+    const primeiroRotulo = mapa.getStyle().layers.find((l) => l.type === "symbol")?.id;
+    const camada = {
+        id: CAMADA_CALOR,
+        type: "heatmap",
+        source: FONTE_CALOR,
+        paint: {
+          "heatmap-weight": peso,
+          "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 11, 0.9, 16, 2],
+          "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 11, 16, 14, 38, 16, 70],
+          "heatmap-opacity": 0.88,
+          "heatmap-color": [
+            "interpolate",
+            ["linear"],
+            ["heatmap-density"],
+            0,
+            "rgba(167, 232, 194, 0)",
+            0.15,
+            RAMPA_CALOR[0],
+            0.4,
+            RAMPA_CALOR[1],
+            0.7,
+            RAMPA_CALOR[2],
+            1,
+            RAMPA_CALOR[3],
+          ],
+        },
+      } as unknown as Parameters<MapaMapLibre["addLayer"]>[0];
+    mapa.addLayer(camada, primeiroRotulo);
+  }, [mapa, lib, calor]);
+
   // Origem da rota (só quando não há marcador do catador para ocupar o lugar).
   useEffect(() => {
     if (!mapa || !lib) return;
@@ -358,13 +429,14 @@ export function MapaQuixada({
   // Enquadramento: só quando muda o conjunto de pontos (não a cada seleção).
   useEffect(() => {
     if (!mapa || !lib) return;
-    const chave = `${pedidos.map((p) => p.id).join(",")}|${rota?.ordem.join(",") ?? ""}`;
+    const chave = `${pedidos.map((p) => p.id).join(",")}|${rota?.ordem.join(",") ?? ""}|${calor ? "calor" : ""}`;
     if (chave === chaveEnquadramento.current) return;
     chaveEnquadramento.current = chave;
     const pontos: Ponto[] = [
       ...pedidos.map((p) => p.ponto),
       ...(rota ? [rota.origem] : []),
       ...(posicaoCatador ? [posicaoCatador] : []),
+      ...(calor ? calor.pontos : []),
     ];
     if (pontos.length === 0) {
       mapa.jumpTo({ center: CENTRO, zoom: 13 });
@@ -377,7 +449,7 @@ export function MapaQuixada({
       maxZoom: 16,
       duration: reduzirMovimento() ? 0 : 700,
     });
-  }, [mapa, lib, pedidos, rota, posicaoCatador]);
+  }, [mapa, lib, pedidos, rota, posicaoCatador, calor]);
 
   return (
     <div

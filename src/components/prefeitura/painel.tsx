@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import type { ReactNode } from "react";
+import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip, type TomChip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -249,6 +250,13 @@ export function Painel() {
       </section>
 
       <Secao id={`${uid}-mapa`} titulo="Mapa da cidade">
+        <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base text-text-muted">
+          Pedidos de agora, por situação.
+          <ButtonLink href="/prefeitura/mapa" variante="secundario">
+            <Icon nome="pino" />
+            Abrir o mapa de calor
+          </ButtonLink>
+        </p>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <MapaQuixada
             pedidos={estado.pedidos.filter((p) => p.status !== "cancelado")}

@@ -67,3 +67,11 @@ Verificação de que é perfil a pé (mesmo par de pontos no Centro, ~1,3 km):
 Nos 110 trechos gerados a velocidade média fica entre 4,42 e 4,51 km/h. Espera de 1,1 s entre pedidos; cada pedido tenta até 3 vezes e depois o script aborta com erro, sem gravar arquivo incompleto.
 
 Dados de rota: © OpenStreetMap contributors (ODbL).
+
+## 4. Histórico de exemplo do mapa de calor: `build-historico.mjs`
+
+```bash
+node scripts/geo/build-historico.mjs   # grava src/data/historico.json
+```
+
+Gera ~100 doações fictícias em torno dos pontos de `pontos-geo.json`, com um perfil por bairro (quem mais dá e o quê, parcela de comércios). Não usa rede nem dado pessoal e é determinístico (mesma semente, mesmo arquivo). Alimenta o mapa de calor da Prefeitura (`/prefeitura/mapa`).
