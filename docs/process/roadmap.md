@@ -16,7 +16,7 @@ Cada uma depende de decisões ainda **[ABERTO]** em [`decisions.md`](./decisions
 2. **Autenticação e associação** (D-02, D-17, C-10): login real para cidadão, comerciante, catador associado e Prefeitura; fluxo de associação do catador; papéis e permissões no servidor (hoje o perfil vem da URL, C-13).
 3. **Regras reais de pontos e rodízio** (D-04, D-18, C-09): valores por material, bônus, metas, validação da coleta, antifraude, limites do multiplicador. Hoje todos os valores são de exemplo.
 4. **Mapa e rota reais** (D-03, D-19, D-14): provedor de mapa, endereço real e geolocalização com consentimento (LGPD), rota com trânsito, janela de horário e capacidade do catador.
-5. **Eventos e anúncios reais** (C-08): ciclo de vida do evento (aberto e encerrado; hoje todos contam como abertos), pagamento ou contrapartida do patrocínio, análise com histórico.
+5. **Agenda e benefícios reais** (C-14 a C-16, D-20, D-21): ciclo de vida do evento (encerrado, edição e exclusão; hoje a agenda lista todos por data), regras reais dos benefícios do comerciante (base legal da redução de taxa, critérios de selo e certificado, quem concede) e fluxo de recusa de solicitação com devolução de pontos.
 6. **Qualidade e operação** (D-15, D-16): testes de interface e e2e, CI, hospedagem, auditoria de acessibilidade e performance.
 
 ## Fase 0: Fundação de marca no código
