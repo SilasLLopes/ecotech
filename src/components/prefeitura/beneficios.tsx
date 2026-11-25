@@ -96,6 +96,8 @@ export function Beneficios() {
     }
     const beneficio: Beneficio = {
       id: novoId("b"),
+      // Provisório: a Tarefa 3 deixa a prefeitura escolher o público.
+      publico: "cidadao",
       comercio: valores.comercio.trim(),
       titulo: valores.titulo.trim(),
       custo: Number(valores.custo),

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ESTADO_INICIAL, MAPA } from "../data/seed.ts";
-import { pontosDoPedido } from "./coleta.ts";
+import { parseEstado, pontosDoPedido } from "./coleta.ts";
 import type { Ponto } from "./types.ts";
 
 const e = ESTADO_INICIAL;
@@ -59,7 +59,6 @@ test("ids são únicos em cada coleção", () => {
     resgates: e.resgates,
     extrato: e.extrato,
     eventos: e.eventos,
-    anuncios: e.anuncios,
   };
   for (const [nome, itens] of Object.entries(colecoes)) {
     assert.deepEqual(repetidos(itens.map((i) => i.id)), [], nome);
@@ -71,7 +70,6 @@ test("todas as referências entre coleções existem", () => {
   const solicitantes = ids(e.solicitantes);
   const catadores = ids(e.catadores);
   const beneficios = ids(e.beneficios);
-  const eventos = ids(e.eventos);
   const materiais = ids(e.materiais);
 
   assert.ok(materiais.has(e.destaque.materialId), "destaque");
@@ -86,10 +84,6 @@ test("todas as referências entre coleções existem", () => {
   }
   for (const l of e.extrato) {
     assert.ok(solicitantes.has(l.solicitanteId), `${l.id}: solicitante`);
-  }
-  for (const a of e.anuncios) {
-    assert.ok(solicitantes.has(a.solicitanteId), `${a.id}: solicitante`);
-    assert.ok(eventos.has(a.eventoId), `${a.id}: evento`);
   }
 });
 
@@ -111,4 +105,49 @@ test("cada ponto de pedido e de solicitante cai dentro do seu bairro no mapa", (
   };
   for (const p of e.pedidos) conferir(p.id, p.bairro, p.ponto);
   for (const s of e.solicitantes) conferir(s.id, s.bairro, s.ponto);
+});
+
+test("todo benefício tem público válido e há ao menos um ativo de cada público", () => {
+  for (const b of e.beneficios) {
+    assert.ok(b.publico === "cidadao" || b.publico === "comerciante", `${b.id}: público`);
+  }
+  for (const publico of ["cidadao", "comerciante"] as const) {
+    assert.ok(
+      e.beneficios.some((b) => b.publico === publico && b.ativo),
+      `nenhum benefício ativo de ${publico}`,
+    );
+  }
+});
+
+test("benefícios de comerciante vêm da Prefeitura de Quixadá", () => {
+  for (const b of e.beneficios.filter((x) => x.publico === "comerciante")) {
+    assert.equal(b.comercio, "Prefeitura de Quixadá", b.id);
+  }
+});
+
+test("resgates do seed ligam benefício e solicitante do mesmo público", () => {
+  for (const r of e.resgates) {
+    const b = e.beneficios.find((x) => x.id === r.beneficioId);
+    const s = e.solicitantes.find((x) => x.id === r.solicitanteId);
+    assert.ok(b && s, r.id);
+    assert.equal(s.tipo, b.publico, r.id);
+    assert.ok(["emitido", "solicitado", "concedido"].includes(r.status), r.id);
+  }
+});
+
+test("o seed é um estado da versão 2 e passa por parseEstado", () => {
+  assert.equal(e.versao, 2);
+  assert.deepEqual(Object.keys(e).sort(), [
+    "beneficios",
+    "catadores",
+    "destaque",
+    "eventos",
+    "extrato",
+    "materiais",
+    "pedidos",
+    "resgates",
+    "solicitantes",
+    "versao",
+  ]);
+  assert.deepEqual(parseEstado(JSON.stringify(e)), e);
 });

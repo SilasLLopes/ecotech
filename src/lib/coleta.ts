@@ -132,6 +132,7 @@ export function reduzir(estado: Estado, acao: Acao): Estado {
         !solicitante ||
         !beneficio ||
         !beneficio.ativo ||
+        solicitante.tipo !== beneficio.publico ||
         beneficio.estoque <= 0 ||
         solicitante.saldo < beneficio.custo ||
         estado.resgates.some((r) => r.id === acao.id)
@@ -154,6 +155,7 @@ export function reduzir(estado: Estado, acao: Acao): Estado {
             beneficioId: acao.beneficioId,
             codigo: acao.codigo,
             em: acao.em,
+            status: beneficio.publico === "cidadao" ? "emitido" : "solicitado",
           },
         ],
         extrato: [
@@ -161,7 +163,10 @@ export function reduzir(estado: Estado, acao: Acao): Estado {
           {
             id: acao.id,
             solicitanteId: acao.solicitanteId,
-            descricao: `Resgate: ${beneficio.titulo} (${beneficio.comercio})`,
+            descricao:
+              beneficio.publico === "cidadao"
+                ? `Resgate: ${beneficio.titulo} (${beneficio.comercio})`
+                : `Solicitação: ${beneficio.titulo}`,
             pontos: -beneficio.custo,
             em: acao.em,
           },
@@ -210,22 +215,13 @@ export function reduzir(estado: Estado, acao: Acao): Estado {
       return { ...estado, eventos: [...estado.eventos, acao.evento] };
     }
 
-    case "criar-anuncio": {
-      if (estado.anuncios.some((a) => a.id === acao.anuncio.id)) return estado;
+    case "conceder-resgate": {
+      const resgate = estado.resgates.find((r) => r.id === acao.id);
+      if (!resgate || resgate.status !== "solicitado") return estado;
       return {
         ...estado,
-        anuncios: [...estado.anuncios, { ...acao.anuncio, status: "em-analise" }],
-      };
-    }
-
-    case "decidir-anuncio": {
-      const status = acao.aprovado ? "aprovado" : "recusado";
-      const anuncio = estado.anuncios.find((a) => a.id === acao.id);
-      if (!anuncio || anuncio.status === status) return estado;
-      return {
-        ...estado,
-        anuncios: estado.anuncios.map((a) =>
-          a.id === acao.id ? { ...a, status } : a,
+        resgates: estado.resgates.map((r) =>
+          r.id === acao.id ? { ...r, status: "concedido" } : r,
         ),
       };
     }
@@ -241,11 +237,13 @@ const COLECOES = [
   "resgates",
   "extrato",
   "eventos",
-  "anuncios",
 ] as const;
 
-// Validação rasa: versão, destaque (tipos dos dois campos) e presença das coleções como arrays.
-// Não valida o formato de cada item.
+const CHAVES: string[] = ["versao", "destaque", ...COLECOES];
+
+// Validação rasa: versão e chaves do modelo, destaque (tipos dos dois campos), presença das coleções como arrays
+// e, nos benefícios e resgates, só o público e o status (campos que a versão 2 introduziu).
+// Não valida o resto do formato de cada item.
 export function parseEstado(raw: string | null): Estado | null {
   if (!raw) return null;
   let dados: unknown;
@@ -258,7 +256,9 @@ export function parseEstado(raw: string | null): Estado | null {
     return null;
   }
   const obj = dados as Record<string, unknown>;
-  if (obj.versao !== 1) return null;
+  if (obj.versao !== 2) return null;
+  // Chave fora do modelo (por exemplo, uma coleção que a versão 2 não tem mais).
+  if (Object.keys(obj).some((chave) => !CHAVES.includes(chave))) return null;
   const destaque = obj.destaque as Record<string, unknown> | null;
   if (typeof destaque !== "object" || destaque === null) return null;
   if (
@@ -269,5 +269,18 @@ export function parseEstado(raw: string | null): Estado | null {
     return null;
   }
   if (!COLECOES.every((chave) => Array.isArray(obj[chave]))) return null;
+  const publicoValido = (b: unknown) =>
+    typeof b === "object" &&
+    b !== null &&
+    ((b as Record<string, unknown>).publico === "cidadao" ||
+      (b as Record<string, unknown>).publico === "comerciante");
+  const statusValido = (r: unknown) =>
+    typeof r === "object" &&
+    r !== null &&
+    ["emitido", "solicitado", "concedido"].includes(
+      (r as Record<string, unknown>).status as string,
+    );
+  if (!(obj.beneficios as unknown[]).every(publicoValido)) return null;
+  if (!(obj.resgates as unknown[]).every(statusValido)) return null;
   return obj as unknown as Estado;
 }

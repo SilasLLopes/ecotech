@@ -25,7 +25,7 @@ function pedido(over: Partial<Pedido> = {}): Pedido {
 
 function base(): Estado {
   return {
-    versao: 1,
+    versao: 2,
     destaque: { materialId: "pet", multiplicador: 1.25 },
     materiais: [
       { id: "pet", nome: "PET", unidade: "kg", pontosBase: 8 },
@@ -64,12 +64,11 @@ function base(): Estado {
     ],
     pedidos: [],
     beneficios: [
-      { id: "b1", comercio: "Loja de exemplo", titulo: "Desconto", custo: 40, estoque: 2, ativo: true },
+      { id: "b1", publico: "cidadao", comercio: "Loja de exemplo", titulo: "Desconto", custo: 40, estoque: 2, ativo: true },
     ],
     resgates: [],
     extrato: [],
     eventos: [],
-    anuncios: [],
   };
 }
 
@@ -247,9 +246,52 @@ test("resgatar debita saldo e estoque e registra resgate e lançamento", () => {
     beneficioId: "b1",
     codigo: "ECO-1234",
     em: "2026-01-02T09:00:00",
+    status: "emitido",
   });
   assert.equal(novo.extrato.length, 1);
   assert.equal(novo.extrato[0].pontos, -40);
+});
+
+function comComerciante(): Estado {
+  const e = base();
+  e.solicitantes[0].tipo = "comerciante";
+  e.beneficios[0].publico = "comerciante";
+  e.beneficios[0].titulo = "Selo de exemplo";
+  return e;
+}
+
+test("resgatar do comerciante vira solicitação e o extrato diz Solicitação", () => {
+  const novo = reduzir(comComerciante(), resgatar);
+  assert.equal(novo.resgates[0].status, "solicitado");
+  assert.equal(novo.solicitantes[0].saldo, 60);
+  assert.equal(novo.beneficios[0].estoque, 1);
+  assert.ok(novo.extrato[0].descricao.startsWith("Solicitação:"));
+  assert.equal(novo.extrato[0].pontos, -40);
+});
+
+test("resgatar de outro público devolve o mesmo estado", () => {
+  const cidadaoPedeComerciante = base();
+  cidadaoPedeComerciante.beneficios[0].publico = "comerciante";
+  assert.equal(reduzir(cidadaoPedeComerciante, resgatar), cidadaoPedeComerciante);
+  assert.equal(cidadaoPedeComerciante.solicitantes[0].saldo, 100);
+  assert.equal(cidadaoPedeComerciante.beneficios[0].estoque, 2);
+
+  const comercianteQuerCidadao = base();
+  comercianteQuerCidadao.solicitantes[0].tipo = "comerciante";
+  assert.equal(reduzir(comercianteQuerCidadao, resgatar), comercianteQuerCidadao);
+  assert.equal(comercianteQuerCidadao.solicitantes[0].saldo, 100);
+  assert.equal(comercianteQuerCidadao.beneficios[0].estoque, 2);
+});
+
+test("conceder-resgate muda só solicitado para concedido", () => {
+  const solicitado = reduzir(comComerciante(), resgatar);
+  const concedido = reduzir(solicitado, { type: "conceder-resgate", id: "r1" });
+  assert.equal(concedido.resgates[0].status, "concedido");
+  assert.equal(concedido.solicitantes[0].saldo, solicitado.solicitantes[0].saldo);
+  assert.equal(reduzir(concedido, { type: "conceder-resgate", id: "r1" }), concedido);
+  assert.equal(reduzir(solicitado, { type: "conceder-resgate", id: "zzz" }), solicitado);
+  const emitido = reduzir(base(), resgatar);
+  assert.equal(reduzir(emitido, { type: "conceder-resgate", id: "r1" }), emitido);
 });
 
 test("resgatar com saldo exatamente igual ao custo funciona", () => {
@@ -298,28 +340,18 @@ test("alternar-beneficio e criar-beneficio", () => {
   const off = reduzir(e, { type: "alternar-beneficio", id: "b1" });
   assert.equal(off.beneficios[0].ativo, false);
   assert.equal(reduzir(e, { type: "alternar-beneficio", id: "zzz" }), e);
-  const novo = { id: "b2", comercio: "Outra", titulo: "Brinde", custo: 10, estoque: 5, ativo: true };
+  const novo = { id: "b2", publico: "cidadao" as const, comercio: "Outra", titulo: "Brinde", custo: 10, estoque: 5, ativo: true };
   const com = reduzir(e, { type: "criar-beneficio", beneficio: novo });
   assert.equal(com.beneficios.length, 2);
   assert.equal(reduzir(com, { type: "criar-beneficio", beneficio: novo }), com);
 });
 
-test("criar-evento, criar-anuncio e decidir-anuncio", () => {
+test("criar-evento", () => {
   const e = base();
   const evento = { id: "e1", titulo: "Feira", data: "2026-02-01", local: "Praça", descricao: "Exemplo" };
   const comEvento = reduzir(e, { type: "criar-evento", evento });
   assert.equal(comEvento.eventos.length, 1);
   assert.equal(reduzir(comEvento, { type: "criar-evento", evento }), comEvento);
-
-  const anuncio = { id: "a1", solicitanteId: "s1", eventoId: "e1", titulo: "Oferta", oferta: "10%", status: "aprovado" } as const;
-  const comAnuncio = reduzir(comEvento, { type: "criar-anuncio", anuncio });
-  assert.equal(comAnuncio.anuncios[0].status, "em-analise");
-
-  const ok = reduzir(comAnuncio, { type: "decidir-anuncio", id: "a1", aprovado: true });
-  assert.equal(ok.anuncios[0].status, "aprovado");
-  const no = reduzir(comAnuncio, { type: "decidir-anuncio", id: "a1", aprovado: false });
-  assert.equal(no.anuncios[0].status, "recusado");
-  assert.equal(reduzir(comAnuncio, { type: "decidir-anuncio", id: "zzz", aprovado: true }), comAnuncio);
 });
 
 test("parseEstado rejeita entradas inválidas", () => {
@@ -342,6 +374,36 @@ test("parseEstado rejeita destaque malformado", () => {
   assert.notEqual(parseEstado(com({ materialId: "pet", multiplicador: 1.2 })), null);
 });
 
+test("parseEstado exige a versão 2 e o modelo de público e status", () => {
+  const com = (mut: (o: Record<string, unknown>) => void) => {
+    const o = JSON.parse(JSON.stringify(reduzir(base(), resgatar))) as Record<string, unknown>;
+    mut(o);
+    return JSON.stringify(o);
+  };
+  assert.equal(parseEstado(com((o) => { o.versao = 1; })), null);
+  // Coleção do modelo antigo, que a versão 2 não tem mais.
+  const antiga = ["anun", "cios"].join("");
+  assert.equal(parseEstado(com((o) => { o[antiga] = []; })), null);
+  assert.equal(
+    parseEstado(com((o) => { delete (o.beneficios as Record<string, unknown>[])[0].publico; })),
+    null,
+  );
+  assert.equal(
+    parseEstado(com((o) => { (o.beneficios as Record<string, unknown>[])[0].publico = "x"; })),
+    null,
+  );
+  assert.equal(
+    parseEstado(com((o) => { (o.resgates as Record<string, unknown>[])[0].status = "x"; })),
+    null,
+  );
+  assert.equal(
+    parseEstado(com((o) => { delete (o.resgates as Record<string, unknown>[])[0].status; })),
+    null,
+  );
+  const v2 = reduzir(base(), resgatar);
+  assert.deepEqual(parseEstado(JSON.stringify(v2)), v2);
+});
+
 function congelar<T>(valor: T): T {
   if (typeof valor === "object" && valor !== null && !Object.isFrozen(valor)) {
     Object.freeze(valor);
@@ -356,8 +418,8 @@ test("reduzir não muta o estado (Estado congelado, uma ação de cada tipo)", (
     pedido({ id: "a" }),
     pedido({ id: "b", status: "aceito", catadorId: "c1" }),
   ];
-  e.anuncios = [
-    { id: "a1", solicitanteId: "s1", eventoId: "e1", titulo: "Oferta", oferta: "10%", status: "em-analise" },
+  e.resgates = [
+    { id: "r0", solicitanteId: "s1", beneficioId: "b1", codigo: "ECO-0000", em: "2026-01-01T08:00:00", status: "solicitado" },
   ];
   congelar(e);
   const acoes: Acao[] = [
@@ -367,11 +429,10 @@ test("reduzir não muta o estado (Estado congelado, uma ação de cada tipo)", (
     { type: "cancelar", id: "a" },
     resgatar,
     { type: "definir-destaque", materialId: "vidro", multiplicador: 1.3 },
-    { type: "criar-beneficio", beneficio: { id: "b2", comercio: "Outra", titulo: "Brinde", custo: 10, estoque: 5, ativo: true } },
+    { type: "criar-beneficio", beneficio: { id: "b2", publico: "cidadao", comercio: "Outra", titulo: "Brinde", custo: 10, estoque: 5, ativo: true } },
     { type: "alternar-beneficio", id: "b1" },
     { type: "criar-evento", evento: { id: "e1", titulo: "Feira", data: "2026-02-01", local: "Praça", descricao: "Exemplo" } },
-    { type: "criar-anuncio", anuncio: { id: "a2", solicitanteId: "s1", eventoId: "e1", titulo: "Oferta", oferta: "10%", status: "em-analise" } },
-    { type: "decidir-anuncio", id: "a1", aprovado: true },
+    { type: "conceder-resgate", id: "r0" },
   ];
   for (const acao of acoes) {
     const novo = reduzir(e, acao);

@@ -65,8 +65,12 @@ export type Catador = {
   origem: Ponto;
 };
 
+// Quem pode resgatar: bate com Solicitante.tipo.
+export type Publico = "cidadao" | "comerciante";
+
 export type Beneficio = {
   id: string;
+  publico: Publico;
   comercio: string;
   titulo: string;
   custo: number;
@@ -74,12 +78,17 @@ export type Beneficio = {
   ativo: boolean;
 };
 
+// Cidadão: o cupom nasce "emitido". Comerciante: a solicitação nasce
+// "solicitado" e a prefeitura a marca "concedido".
+export type StatusResgate = "emitido" | "solicitado" | "concedido";
+
 export type Resgate = {
   id: string;
   solicitanteId: string;
   beneficioId: string;
   codigo: string;
   em: string;
+  status: StatusResgate;
 };
 
 // pontos é negativo no resgate.
@@ -99,19 +108,10 @@ export type Evento = {
   descricao: string;
 };
 
-export type Anuncio = {
-  id: string;
-  solicitanteId: string;
-  eventoId: string;
-  titulo: string;
-  oferta: string;
-  status: "em-analise" | "aprovado" | "recusado";
-};
-
 export type Destaque = { materialId: MaterialId; multiplicador: number };
 
 export type Estado = {
-  versao: 1;
+  versao: 2;
   destaque: Destaque;
   materiais: Material[];
   solicitantes: Solicitante[];
@@ -121,7 +121,6 @@ export type Estado = {
   resgates: Resgate[];
   extrato: Lancamento[];
   eventos: Evento[];
-  anuncios: Anuncio[];
 };
 
 // Ids, horários e códigos vêm prontos na ação: o reducer é puro.
@@ -143,5 +142,4 @@ export type Acao =
   | { type: "criar-beneficio"; beneficio: Beneficio }
   | { type: "alternar-beneficio"; id: string }
   | { type: "criar-evento"; evento: Evento }
-  | { type: "criar-anuncio"; anuncio: Anuncio }
-  | { type: "decidir-anuncio"; id: string; aprovado: boolean };
+  | { type: "conceder-resgate"; id: string };

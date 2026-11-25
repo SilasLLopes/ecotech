@@ -61,7 +61,9 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
 
   if (!solicitante) return <SemSolicitante />;
 
-  const beneficios = estado.beneficios.filter((b) => b.ativo);
+  const beneficios = estado.beneficios.filter(
+    (b) => b.ativo && b.publico === solicitante.tipo,
+  );
   const cupons = estado.resgates
     .filter((r) => r.solicitanteId === solicitante.id)
     .slice()
