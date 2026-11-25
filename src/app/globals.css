@@ -299,3 +299,14 @@ h3 {
     transform: translateY(-12px);
   }
 }
+
+/* Esmaece as bordas laterais de uma silhueta recortada (só a transparência importa). */
+.silhueta-suave {
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-graphite) 22%,
+    var(--color-graphite) 78%,
+    transparent
+  );
+}

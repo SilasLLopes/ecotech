@@ -1,6 +1,8 @@
 "use client";
 
 import { Logo } from "@/components/brand/logo";
+import { Monolitos } from "@/components/brand/monolitos";
+import { Contador } from "@/components/ui/contador";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DEMO } from "@/data/seed";
 import { numero } from "@/lib/format";
@@ -56,14 +58,7 @@ export function CartaoSaldo({
       aria-label="Seu saldo de pontos"
       className="relative min-h-48 overflow-hidden rounded-xl bg-reward p-6 text-white shadow-raised"
     >
-      <svg
-        viewBox="0 0 200 140"
-        aria-hidden="true"
-        focusable="false"
-        className="pointer-events-none absolute bottom-0 right-0 h-3/4 w-auto fill-primary opacity-25"
-      >
-        <path d="M200 0C140 18 104 72 96 140H200Z" />
-      </svg>
+      <Monolitos className="absolute inset-x-0 bottom-0 h-24 text-primary-soft opacity-20" />
       <div className="relative flex min-h-36 flex-col justify-between gap-4">
         <div className="flex items-start justify-between gap-3">
           <Logo variante="horizontal" fundo="mono-branco" altura={28} />
@@ -77,9 +72,7 @@ export function CartaoSaldo({
             : "Você faz a diferença!"}
         </p>
         <p className="flex items-baseline gap-2">
-          <span className="text-4xl font-extrabold tabular-nums">
-            {numero(saldo)}
-          </span>
+          <Contador valor={saldo} className="text-4xl font-extrabold" />
           <span className="text-lg font-semibold text-primary-soft">pts</span>
           <span className="sr-only">de saldo</span>
         </p>

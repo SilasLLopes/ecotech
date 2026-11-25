@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { MaterialId } from "@/lib/types";
 
 export type IconeNome =
   | "folha"
@@ -19,7 +20,13 @@ export type IconeNome =
   | "x"
   | "seta"
   | "reiniciar"
-  | "chevron";
+  | "chevron"
+  | "garrafa"
+  | "caixa"
+  | "lata"
+  | "vidro"
+  | "gota"
+  | "chip";
 
 // Traçados em grade 24x24, traço de 1,75, pontas arredondadas, currentColor.
 const TRACADOS: Record<IconeNome, ReactNode> = {
@@ -61,6 +68,44 @@ const TRACADOS: Record<IconeNome, ReactNode> = {
       <circle cx="6" cy="18" r="2" />
       <circle cx="18" cy="6" r="2" />
       <path d="M8 18h6.5a3.5 3.5 0 0 0 0-7h-5a3.5 3.5 0 0 1 0-7H16" />
+    </>
+  ),
+  garrafa: (
+    <>
+      <path d="M10 2.5h4V5l2 2.8c.3.5.5 1 .5 1.7V20a1.5 1.5 0 0 1-1.5 1.5H9A1.5 1.5 0 0 1 7.5 20V9.5c0-.7.2-1.2.5-1.7L10 5V2.5Z" />
+      <path d="M7.5 13h9" />
+    </>
+  ),
+  caixa: (
+    <>
+      <path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5v-9Z" />
+      <path d="M3.5 7.5 12 12l8.5-4.5M12 12v9" />
+    </>
+  ),
+  lata: (
+    <>
+      <path d="M7 6c0-1.1 2.2-2 5-2s5 .9 5 2-2.2 2-5 2-5-.9-5-2Z" />
+      <path d="M7 6v12c0 1.1 2.2 2 5 2s5-.9 5-2V6" />
+      <path d="M7 11c0 1.1 2.2 2 5 2s5-.9 5-2" />
+    </>
+  ),
+  vidro: (
+    <>
+      <path d="M10.5 2.5h3v6c0 1.2 2.5 2.4 2.5 5V20a1.5 1.5 0 0 1-1.5 1.5h-5A1.5 1.5 0 0 1 8 20v-6.5c0-2.6 2.5-3.8 2.5-5v-6Z" />
+      <path d="M8 15.5h8" />
+    </>
+  ),
+  gota: (
+    <>
+      <path d="M12 3c3.5 4.2 6 7.2 6 10.4a6 6 0 0 1-12 0C6 10.2 8.5 7.2 12 3Z" />
+      <path d="M9.5 14a2.6 2.6 0 0 0 2.2 2.4" />
+    </>
+  ),
+  chip: (
+    <>
+      <path d="M7 7h10v10H7Z" />
+      <path d="M10.5 10.5h3v3h-3Z" />
+      <path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4" />
     </>
   ),
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
@@ -148,3 +193,14 @@ export function Icon({ nome, tamanho = "md", className = "" }: IconProps) {
     </svg>
   );
 }
+
+// Cada material tem o seu glifo, para as listas e as peças de Coletar não
+// parecerem todas iguais.
+export const ICONE_DO_MATERIAL: Record<MaterialId, IconeNome> = {
+  pet: "garrafa",
+  papelao: "caixa",
+  latas: "lata",
+  vidro: "vidro",
+  oleo: "gota",
+  eletronicos: "chip",
+};
