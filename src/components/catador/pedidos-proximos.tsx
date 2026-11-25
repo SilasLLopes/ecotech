@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Icon } from "@/components/ui/icon";
+import { ICONE_DO_MATERIAL, Icon } from "@/components/ui/icon";
+import { Revelar } from "@/components/ui/revelar";
 import { pontosDoPedido } from "@/lib/coleta";
 import { formatarEm, numero } from "@/lib/format";
 import { ROTAS } from "@/data/rotas";
@@ -105,12 +106,12 @@ export function PedidosProximos() {
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-44">
-      <div>
-        <h1 className="text-2xl font-bold text-graphite">Pedidos de coleta</h1>
-        <p className="mt-1 text-base text-text-muted">
-          Escolha os pedidos que cabem no seu percurso e veja a rota mais curta.
-          Pedidos e distâncias de exemplo.
+    <div className="flex flex-col pb-44">
+      <div className="pb-4">
+        <h1 className="text-2xl font-bold text-graphite">Pedidos perto de você</h1>
+        <p className="mt-1 text-sm text-text-muted">
+          Marque os que cabem no seu percurso; a rota pelas ruas se desenha no
+          mapa. Pedidos e distâncias de exemplo.
         </p>
       </div>
 
@@ -124,7 +125,9 @@ export function PedidosProximos() {
         </Card>
       ) : (
         <>
-          <Card>
+          {/* Mapa de borda a borda, grudado sob o cabeçalho; a lista sobe sobre
+              ele como uma gaveta. */}
+          <div className="sticky top-16 z-10 -mx-4">
             <MapaQuixada
               pedidos={disponiveis}
               selecionados={validos}
@@ -136,14 +139,18 @@ export function PedidosProximos() {
                 disponiveis.length === 1 ? "pedido aguardando" : "pedidos aguardando"
               } coleta`}
             />
-          </Card>
+          </div>
 
-          <section aria-labelledby={`${uid}-lista-pedidos`} className="flex flex-col gap-4">
+          <section
+            aria-labelledby={`${uid}-lista-pedidos`}
+            className="relative z-20 -mx-4 -mt-5 flex flex-col gap-4 rounded-t-2xl bg-mint-surface px-4 pt-5 shadow-[0_-10px_28px_rgb(32_43_40/0.14)]"
+          >
+            <span aria-hidden="true" className="mx-auto -mt-2 h-1 w-10 rounded-full bg-border-soft" />
             <h2 id={`${uid}-lista-pedidos`} className="text-xl font-semibold text-graphite">
               Aguardando coleta ({numero(disponiveis.length)})
             </h2>
             <ul className="flex flex-col gap-3">
-              {porDistancia.map(({ pedido, dist }) => {
+              {porDistancia.map(({ pedido, dist }, indice) => {
                 const marcado = validos.includes(pedido.id);
                 const pts = pontosDoPedido(
                   pedido.itens,
@@ -152,11 +159,11 @@ export function PedidosProximos() {
                 );
                 const metros = Math.round(dist / 10) * 10;
                 return (
-                  <li key={pedido.id}>
+                  <Revelar as="li" key={pedido.id} indice={indice}>
                     <label
                       className={`relative flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border-[1.5px] p-4 shadow-card has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-tech-blue ${
                         marcado
-                          ? "border-primary-strong bg-mint-wash"
+                          ? "border-primary-strong bg-white ring-4 ring-primary-soft/60"
                           : "border-border-soft bg-white"
                       }`}
                     >
@@ -169,9 +176,10 @@ export function PedidosProximos() {
                         className="absolute inset-0 size-full cursor-pointer opacity-0 scroll-mb-48"
                       />
                       <span
+                        key={String(marcado)}
                         aria-hidden="true"
                         className={`mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md border-[1.5px] border-primary-strong ${
-                          marcado ? "bg-primary-strong text-white" : "bg-white"
+                          marcado ? "pulso-selo bg-primary-strong text-white" : "bg-white"
                         }`}
                       >
                         {marcado && <Icon nome="check" tamanho="sm" />}
@@ -187,7 +195,12 @@ export function PedidosProximos() {
                           {pedido.endereco}
                         </span>
                         <span id={`${uid}-det-${pedido.id}`} className="flex flex-col gap-1">
-                          <span className="text-base text-graphite">
+                          <span className="flex items-center gap-2 text-base text-graphite">
+                            <span aria-hidden="true" className="flex gap-1 text-primary-strong">
+                              {pedido.itens.map((i) => (
+                                <Icon key={i.materialId} nome={ICONE_DO_MATERIAL[i.materialId]} tamanho="sm" />
+                              ))}
+                            </span>
                             {descreverItens(estado, pedido)}
                           </span>
                           <span className="text-sm text-text-muted">
@@ -199,13 +212,13 @@ export function PedidosProximos() {
                               cerca de {numero(pts)} pts
                             </Chip>
                             <Chip tom="neutro" icone="pino">
-                              ~{numero(metros)} m da origem
+                              ~{numero(metros)} m de você
                             </Chip>
                           </span>
                         </span>
                       </span>
                     </label>
-                  </li>
+                  </Revelar>
                 );
               })}
             </ul>

@@ -32,7 +32,7 @@ type Props = {
   porStatus?: boolean;
   onSelecionar?: (id: string) => void;
   rotulo: string;
-  altura?: "baixa" | "media" | "alta";
+  altura?: "baixa" | "media" | "alta" | "cheia";
 };
 
 type Biblioteca = typeof import("maplibre-gl");
@@ -43,7 +43,13 @@ const LIMITES: LngLatBoundsLike = [
   [-39.16, -5.09],
   [-38.86, -4.85],
 ];
-const ALTURAS = { baixa: "h-56", media: "h-72 sm:h-80", alta: "h-96" } as const;
+// "cheia": mapa de borda a borda do app do catador (sem moldura), ~44% da altura da tela.
+const ALTURAS = {
+  baixa: "h-56",
+  media: "h-72 sm:h-80",
+  alta: "h-96",
+  cheia: "h-[44vh] min-h-64 max-h-[26rem]",
+} as const;
 
 const TEXTOS_PT = {
   "NavigationControl.ZoomIn": "Aproximar o mapa",
@@ -373,7 +379,9 @@ export function MapaQuixada({
 
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-lg border border-border-soft bg-mint-wash ${ALTURAS[altura]}`}
+      className={`relative w-full overflow-hidden bg-mint-wash ${
+        altura === "cheia" ? "" : "rounded-lg border border-border-soft"
+      } ${ALTURAS[altura]}`}
     >
       <div ref={container} role="region" aria-label={rotulo} className="h-full w-full" />
       {!mapa && !falhou && (

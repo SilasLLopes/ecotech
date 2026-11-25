@@ -6,7 +6,8 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Icon } from "@/components/ui/icon";
+import { ICONE_DO_MATERIAL, Icon } from "@/components/ui/icon";
+import { Revelar } from "@/components/ui/revelar";
 import { pontosDoPedido } from "@/lib/coleta";
 import { hora, numero } from "@/lib/format";
 import { ROTAS } from "@/data/rotas";
@@ -109,7 +110,7 @@ export function Rota() {
   const totalPontos = concluidas.reduce((soma, c) => soma + c.pontos, 0);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
         <h1 className="text-2xl font-bold text-graphite">Sua rota</h1>
         <p className="mt-1 text-base text-text-muted">
@@ -169,26 +170,34 @@ export function Rota() {
         </Card>
       ) : (
         <>
-          <Card className="flex flex-col gap-3">
+          {/* Mapa de borda a borda, grudado sob o cabeçalho; as paradas sobem
+              sobre ele como uma gaveta. */}
+          <div className="sticky top-16 z-10 -mx-4">
             <MapaQuixada
               pedidos={paradas}
               rota={{ origem, ordem: rota.ordem }}
               posicaoCatador={catador.posicao}
-              altura="alta"
+              altura="cheia"
               rotulo={`Mapa da rota com ${paradas.length} ${
                 paradas.length === 1 ? "parada" : "paradas"
               } numeradas`}
             />
-            <p className="text-base font-semibold text-graphite">
-              {resumoDaRota(paradas.length, percurso.distanciaM, minutos)}
-            </p>
-          </Card>
+          </div>
 
-          <section aria-labelledby={`${uid}-paradas`} className="flex flex-col gap-4">
-            <h2 id={`${uid}-paradas`} className="text-xl font-semibold text-graphite">
-              Paradas
-            </h2>
-            <ol className="flex flex-col gap-3">
+          <section
+            aria-labelledby={`${uid}-paradas`}
+            className="relative z-20 -mx-4 -mt-9 flex flex-col gap-4 rounded-t-2xl bg-mint-surface px-4 pt-5 shadow-[0_-10px_28px_rgb(32_43_40/0.14)]"
+          >
+            <span aria-hidden="true" className="mx-auto -mt-2 h-1 w-10 rounded-full bg-border-soft" />
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h2 id={`${uid}-paradas`} className="text-xl font-semibold text-graphite">
+                Paradas
+              </h2>
+              <p className="text-base font-semibold text-graphite">
+                {resumoDaRota(paradas.length, percurso.distanciaM, minutos)}
+              </p>
+            </div>
+            <ol className="flex flex-col">
               {paradas.map((pedido, i) => {
                 const pts = pontosDoPedido(
                   pedido.itens,
@@ -196,42 +205,54 @@ export function Rota() {
                   estado.destaque,
                 );
                 const proxima = i === 0;
+                const ultima = i === paradas.length - 1;
                 return (
-                  <li key={pedido.id}>
-                    <Card className="flex flex-col gap-3">
-                      <div className="flex items-start gap-3">
-                        <span
-                          aria-hidden="true"
-                          className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-tech-blue text-base font-bold text-white"
-                        >
-                          {i + 1}
+                  <Revelar as="li" key={pedido.id} indice={i} className="relative flex gap-3 pb-4">
+                    {!ultima && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute bottom-0 left-4 top-9 w-0.5 -translate-x-1/2 rounded-full bg-border-soft"
+                      />
+                    )}
+                    <span
+                      aria-hidden="true"
+                      className={`relative inline-flex size-8 shrink-0 items-center justify-center rounded-full text-base font-bold text-white ${
+                        proxima ? "pulso-selo bg-tech-blue" : "bg-tech-blue/80"
+                      }`}
+                    >
+                      {i + 1}
+                    </span>
+                    <div
+                      className={`flex min-w-0 flex-1 flex-col gap-2 rounded-lg ${
+                        proxima ? "border border-border-soft bg-white p-4 shadow-card" : "pt-1"
+                      }`}
+                    >
+                      <h3 className="text-lg font-semibold text-graphite">
+                        <span className="sr-only">Parada {i + 1}: </span>
+                        {pedido.endereco}
+                      </h3>
+                      <p className="text-sm text-text-muted">
+                        {pedido.bairro}. {nomeDoSolicitante(estado, pedido)}
+                      </p>
+                      <p className="flex items-center gap-2 text-base text-graphite">
+                        <span aria-hidden="true" className="flex gap-1 text-primary-strong">
+                          {pedido.itens.map((it) => (
+                            <Icon key={it.materialId} nome={ICONE_DO_MATERIAL[it.materialId]} tamanho="sm" />
+                          ))}
                         </span>
-                        <div className="flex min-w-0 flex-col gap-1">
-                          <h3 className="text-lg font-semibold text-graphite">
-                            <span className="sr-only">Parada {i + 1}: </span>
-                            {pedido.endereco}
-                          </h3>
-                          <p className="text-sm text-text-muted">
-                            {pedido.bairro}. {nomeDoSolicitante(estado, pedido)}
-                          </p>
-                          <p className="text-base text-graphite">
-                            {descreverItens(estado, pedido)}
-                          </p>
-                          <p className="text-sm text-text-muted">
-                            Retirada: {pedido.janela}
-                          </p>
-                          <p className="mt-1 flex flex-wrap gap-2">
-                            <Chip tom="ok" icone="trofeu">
-                              cerca de {numero(pts)} pts
-                            </Chip>
-                            {proxima && (
-                              <Chip tom="ok" icone="caminhao">
-                                Próxima parada
-                              </Chip>
-                            )}
-                          </p>
-                        </div>
-                      </div>
+                        {descreverItens(estado, pedido)}
+                      </p>
+                      <p className="text-sm text-text-muted">Retirada: {pedido.janela}</p>
+                      <p className="flex flex-wrap gap-2">
+                        <Chip tom="ok" icone="trofeu">
+                          cerca de {numero(pts)} pts
+                        </Chip>
+                        {proxima && (
+                          <Chip tom="ok" icone="caminhao">
+                            Próxima parada
+                          </Chip>
+                        )}
+                      </p>
                       {proxima ? (
                         <Button
                           variante="primario"
@@ -247,8 +268,8 @@ export function Rota() {
                           Depois da parada {i}
                         </p>
                       )}
-                    </Card>
-                  </li>
+                    </div>
+                  </Revelar>
                 );
               })}
             </ol>
