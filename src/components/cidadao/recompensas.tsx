@@ -15,7 +15,8 @@ import {
   type PerfilMovel,
 } from "./compartilhado";
 
-// Código do cupom: 6 caracteres maiúsculos derivados do id do resgate.
+// Código do cupom (cidadão) ou protocolo (comerciante): 6 caracteres maiúsculos
+// derivados do id do resgate.
 function codigoDoResgate(id: string): string {
   return id.replace(/[^a-z0-9]/gi, "").slice(-6).toUpperCase();
 }
@@ -64,8 +65,14 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
   const beneficios = estado.beneficios.filter(
     (b) => b.ativo && b.publico === solicitante.tipo,
   );
-  const cupons = estado.resgates
-    .filter((r) => r.solicitanteId === solicitante.id)
+  const comercio = perfil === "comerciante";
+  // Cidadão: cupons emitidos. Comerciante: solicitações (solicitado/concedido).
+  const meusResgates = estado.resgates
+    .filter(
+      (r) =>
+        r.solicitanteId === solicitante.id &&
+        (comercio ? r.status !== "emitido" : r.status === "emitido"),
+    )
     .slice()
     .reverse();
 
@@ -76,6 +83,13 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
       travado.current = false;
       timer.current = null;
     }, TRAVA_MS);
+    // Confere no estado fresco, na hora do clique: o benefício pode ter sido
+    // desativado em outra aba, e a tela só resgata itens do próprio público.
+    const alvo = obterEstado().beneficios.find((b) => b.id === beneficioId);
+    if (!alvo || !alvo.ativo || alvo.publico !== solicitante.tipo) {
+      setResultado({ ok: false, id: "", codigo: "" });
+      return;
+    }
     const id = novoId("r");
     const codigo = codigoDoResgate(id);
     dispatch({
@@ -87,7 +101,7 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
       em: hora(new Date()),
     });
     // O reducer pode recusar (estoque ou saldo mudaram em outra aba): confere
-    // no estado fresco, na hora do clique.
+    // de novo no estado fresco.
     const feito = obterEstado().resgates.some((r) => r.id === id);
     setResultado({ ok: feito, id, codigo });
   }
@@ -100,13 +114,19 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
   const feito = aviso?.ok ?? false;
   const mensagem = aviso
     ? aviso.ok
-      ? `Cupom resgatado! Seu código é ${aviso.codigo}.`
-      : "Não foi possível resgatar agora. Confira o saldo e tente de novo."
+      ? comercio
+        ? `Solicitação enviada! Seu protocolo é ${aviso.codigo}.`
+        : `Cupom resgatado! Seu código é ${aviso.codigo}.`
+      : comercio
+        ? "Não foi possível solicitar agora. Confira o saldo e as vagas e tente de novo."
+        : "Não foi possível resgatar agora. Confira o saldo e tente de novo."
     : null;
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-graphite">Recompensas</h1>
+      <h1 className="text-2xl font-bold text-graphite">
+        {comercio ? "Benefícios do programa" : "Recompensas"}
+      </h1>
 
       <CartaoSaldo saldo={solicitante.saldo} comercio={perfil === "comerciante"} />
 
@@ -133,16 +153,22 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
           <EmptyState
             icone="presente"
             titulo="Nenhum benefício disponível agora"
-            texto="A Prefeitura e os comércios da cidade vão adicionar novidades. Volte em breve."
+            texto={
+              comercio
+                ? "A Prefeitura vai adicionar novos benefícios. Volte em breve."
+                : "A Prefeitura e os comércios da cidade vão adicionar novidades. Volte em breve."
+            }
           />
         </Card>
       ) : (
         <section aria-labelledby={`${uid}-beneficios`} className="flex flex-col gap-4">
           <h2 id={`${uid}-beneficios`} className="text-xl font-semibold text-graphite">
-            Benefícios para trocar
+            {comercio ? "Benefícios disponíveis" : "Benefícios para trocar"}
           </h2>
           <p className="-mt-2 text-sm text-text-muted">
-            Benefícios e pontos de exemplo.
+            {comercio
+              ? "Benefícios, vagas e pontos de exemplo."
+              : "Benefícios e pontos de exemplo."}
           </p>
           <ul className="grid gap-4 sm:grid-cols-2">
             {beneficios.map((b) => {
@@ -150,7 +176,9 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
               const esgotado = b.estoque <= 0;
               const semSaldo = falta > 0;
               const motivo = esgotado
-                ? "Esgotado por enquanto."
+                ? comercio
+                  ? "Sem vagas por enquanto."
+                  : "Esgotado por enquanto."
                 : semSaldo
                   ? `Faltam ${numero(falta)} pts. Cada coleta aproxima você.`
                   : null;
@@ -169,11 +197,13 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
                       </span>
                       {esgotado ? (
                         <Chip tom="erro" icone="x">
-                          Esgotado
+                          {comercio ? "Sem vagas" : "Esgotado"}
                         </Chip>
                       ) : (
                         <span className="text-sm text-text-muted">
-                          Restam {numero(b.estoque)}
+                          {comercio
+                            ? `${numero(b.estoque)} ${b.estoque === 1 ? "vaga" : "vagas"}`
+                            : `Restam ${numero(b.estoque)}`}
                         </span>
                       )}
                     </p>
@@ -185,7 +215,7 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
                         aria-describedby={motivo ? `${uid}-motivo-${b.id}` : undefined}
                         onClick={() => resgatar(b.id)}
                       >
-                        Resgatar
+                        {comercio ? "Solicitar" : "Resgatar"}
                       </Button>
                       {motivo && (
                         <p id={`${uid}-motivo-${b.id}`} className="text-sm text-text-muted">
@@ -201,32 +231,62 @@ export function Recompensas({ perfil }: { perfil: PerfilMovel }) {
         </section>
       )}
 
-      {cupons.length === 0 ? (
+      {meusResgates.length === 0 ? (
         <Card>
           <EmptyState
             icone="presente"
-            titulo="Você ainda não tem cupons"
-            texto="Quando você resgatar um benefício, o código aparece aqui para mostrar no comércio."
+            titulo={
+              comercio ? "Você ainda não fez solicitações" : "Você ainda não tem cupons"
+            }
+            texto={
+              comercio
+                ? "Quando você solicitar um benefício, o protocolo aparece aqui para acompanhar."
+                : "Quando você resgatar um benefício, o código aparece aqui para mostrar no comércio."
+            }
           />
         </Card>
       ) : (
         <section aria-labelledby={`${uid}-cupons`} className="flex flex-col gap-4">
           <h2 id={`${uid}-cupons`} className="text-xl font-semibold text-graphite">
-            Meus cupons
+            {comercio ? "Minhas solicitações" : "Meus cupons"}
           </h2>
           <ul className="flex flex-col gap-3">
-            {cupons.map((r) => {
+            {meusResgates.map((r) => {
               const b = estado.beneficios.find((x) => x.id === r.beneficioId);
+              const concedido = r.status === "concedido";
               return (
                 <li key={r.id}>
                   <Card className="flex flex-col gap-2">
                     <p className="text-sm text-text-muted">
-                      {b?.comercio ?? "Comércio parceiro"} · {formatarEm(r.em)}
+                      {b?.comercio ??
+                        (comercio ? "Prefeitura" : "Comércio parceiro")}{" "}
+                      · {formatarEm(r.em)}
                     </p>
                     <p className="text-base font-semibold text-graphite">
-                      {b?.titulo ?? "Benefício resgatado"}
+                      {b?.titulo ??
+                        (comercio ? "Benefício solicitado" : "Benefício resgatado")}
                     </p>
-                    <p className="text-sm text-text-muted">Código do cupom</p>
+                    {comercio && (
+                      <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        {concedido ? (
+                          <Chip tom="ok" icone="check">
+                            Concedido
+                          </Chip>
+                        ) : (
+                          <Chip tom="aviso" icone="relogio">
+                            Solicitado
+                          </Chip>
+                        )}
+                        <span className="text-sm text-text-muted">
+                          {concedido
+                            ? "A Prefeitura concedeu este benefício."
+                            : "A Prefeitura confirma a concessão."}
+                        </span>
+                      </p>
+                    )}
+                    <p className="text-sm text-text-muted">
+                      {comercio ? "Protocolo" : "Código do cupom"}
+                    </p>
                     <p className="text-2xl font-extrabold tracking-widest tabular-nums text-primary-strong">
                       {r.codigo}
                     </p>

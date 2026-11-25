@@ -324,11 +324,11 @@ export function Inicio({ perfil }: { perfil: PerfilMovel }) {
           </ul>
         )}
         <ButtonLink
-          href={`${raiz}/recompensas`}
+          href={comercio ? `${raiz}/beneficios` : `${raiz}/recompensas`}
           variante="terciario"
           className="self-start"
         >
-          Ver recompensas
+          {comercio ? "Ver benefícios" : "Ver recompensas"}
           <Icon nome="seta" />
         </ButtonLink>
       </Card>

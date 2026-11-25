@@ -30,7 +30,7 @@ Não são bugs a corrigir antes do produto real; ficam registradas para não ser
 | Rota após recarregar ou sair da tela | A ordem da rota é recalculada a partir da origem do catador. Depois de recarregar `/catador/rota` ou de navegar para outra tela e voltar, a posição "atual" (última parada coletada) se perde e a rota recomeça da origem do catador |
 | Usuários fixos | Um cidadão (Ana), um comerciante (Mercadinho Bom Preço) e um catador (João) de exemplo. Não há cadastro. "Reiniciar dados de exemplo" volta ao seed; estado salvo antes de uma mudança do seed só atualiza ao reiniciar |
 | Pontos | Todos os valores, metas, bônus e o multiplicador (de ×1,00 a ×1,50, passo 0,05) são de exemplo (D-04 segue aberto) |
-| Texto da entrada do comerciante | A frase "Marque o material do comércio e ofereça benefícios" foi escrita pela implementação e **precisa de confirmação do responsável do projeto** |
+| Texto da entrada do comerciante | A frase "Marque o material do comércio e conquiste benefícios da Prefeitura" foi escrita pela implementação e **precisa de confirmação do responsável do projeto** |
 | Estimativa de rota | Vizinho mais próximo em linha reta; 60 m/min e 4 min por parada são valores de exemplo. A tela rotula como estimativa (D-19 aberto) |
 
 ## Em aberto

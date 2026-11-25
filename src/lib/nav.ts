@@ -23,7 +23,7 @@ export const PERFIS: Record<
   },
   comerciante: {
     rotulo: "Comerciante",
-    frase: "Marque o material do comércio e ofereça benefícios",
+    frase: "Marque o material do comércio e conquiste benefícios da Prefeitura",
     icone: "casa",
     raiz: "/comerciante",
   },
@@ -50,7 +50,7 @@ export const NAV: Record<Perfil, ItemNav[]> = {
   comerciante: [
     { href: "/comerciante", rotulo: "Início", icone: "casa" },
     { href: "/comerciante/coletar", rotulo: "Coletar", icone: "folha" },
-    { href: "/comerciante/recompensas", rotulo: "Recompensas", icone: "presente" },
+    { href: "/comerciante/beneficios", rotulo: "Benefícios", icone: "presente" },
     { href: "/comerciante/eventos", rotulo: "Eventos", icone: "calendario" },
   ],
   catador: [
