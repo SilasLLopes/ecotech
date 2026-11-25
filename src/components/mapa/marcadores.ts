@@ -26,15 +26,17 @@ export type EstadoPino = {
   status?: "aguardando" | "aceito" | "coletado";
 };
 
-function conteudoDoPino({ selecionado, numero, status }: EstadoPino): string {
+function glifoDoPino({ selecionado, numero, status }: EstadoPino): string {
   const desenho =
     status === "aceito" ? CAMINHAO : status === "coletado" || selecionado ? CHECK : FOLHA;
-  const glifo =
-    numero !== undefined
-      ? `<text x="0" y="5.6" text-anchor="middle" font-size="16" font-weight="800" fill="currentColor" stroke="none">${Math.trunc(numero)}</text>`
-      : `<g transform="translate(-9 -9) scale(.75)" ${GLIFO}>${desenho}</g>`;
-  return `<svg class="pino-mapa__forma" viewBox="-20 -20 40 40" aria-hidden="true" focusable="false"><polygon points="${HEXAGONO}" stroke-linejoin="round"/>${glifo}</svg>`;
+  return numero !== undefined
+    ? `<text x="0" y="5.6" text-anchor="middle" font-size="16" font-weight="800" fill="currentColor" stroke="none">${Math.trunc(numero)}</text>`
+    : `<g transform="translate(-9 -9) scale(.75)" ${GLIFO}>${desenho}</g>`;
 }
+
+// O SVG do pino é criado uma vez; só o glifo muda. Recriar o SVG reiniciaria a
+// animação de queda a cada seleção.
+const FORMA = `<svg class="pino-mapa__forma" viewBox="-20 -20 40 40" aria-hidden="true" focusable="false"><polygon points="${HEXAGONO}" stroke-linejoin="round"/><g class="pino-mapa__glifo"></g></svg>`;
 
 // Pino hexagonal de um pedido. Com `aoClicar` vira botão (alvo de 44px, foco
 // visível, `aria-pressed` para a seleção); sem ele é só uma imagem.
@@ -61,7 +63,10 @@ export function atualizarPino(el: HTMLElement, estado: EstadoPino, interativo: b
   el.dataset.selecionado = String(estado.selecionado);
   if (estado.status) el.dataset.status = estado.status;
   else delete el.dataset.status;
-  el.innerHTML = conteudoDoPino(estado);
+  if (!el.firstElementChild) el.innerHTML = FORMA;
+  const glifo = el.querySelector(".pino-mapa__glifo");
+  const html = glifoDoPino(estado);
+  if (glifo && glifo.innerHTML !== html) glifo.innerHTML = html;
 }
 
 // Marcador do catador (caminhão) ou da origem da rota (casa), em tech-blue.
