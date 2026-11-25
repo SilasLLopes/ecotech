@@ -1,0 +1,79 @@
+[
+  {
+    "chave": "s-ana",
+    "bairro": "Centro",
+    "lng": -39.015,
+    "lat": -4.971836,
+    "rua": "Rua Oscar Barbosa"
+  },
+  {
+    "chave": "p-010",
+    "bairro": "Centro",
+    "lng": -39.012303,
+    "lat": -4.971479,
+    "rua": "Rua Autran Moreno"
+  },
+  {
+    "chave": "c-joao",
+    "bairro": "Centro",
+    "lng": -39.017484,
+    "lat": -4.97368,
+    "rua": "Travessa Aristides Gonçalves da Silva"
+  },
+  {
+    "chave": "s-mercadinho",
+    "bairro": "Campo Velho",
+    "lng": -39.009934,
+    "lat": -4.96426,
+    "rua": "Rua Dom Lucas"
+  },
+  {
+    "chave": "p-006",
+    "bairro": "Campo Velho",
+    "lng": -39.009976,
+    "lat": -4.961597,
+    "rua": "Rua Jardim Primavera"
+  },
+  {
+    "chave": "s-carlos",
+    "bairro": "Alto São Francisco",
+    "lng": -39.007244,
+    "lat": -4.965513,
+    "rua": "Rua Benigno Bezerra"
+  },
+  {
+    "chave": "c-francisca",
+    "bairro": "Alto São Francisco",
+    "lng": -39.005809,
+    "lat": -4.966992,
+    "rua": "Rua Benjamin Constant"
+  },
+  {
+    "chave": "p-008",
+    "bairro": "Planalto Universitário",
+    "lng": -39.025161,
+    "lat": -4.967629,
+    "rua": "Avenida Francisco Pinheiro de Almeida"
+  },
+  {
+    "chave": "c-raimundo",
+    "bairro": "Planalto Universitário",
+    "lng": -39.028036,
+    "lat": -4.967476,
+    "rua": "Rua José de Queiroz Pessoa"
+  },
+  {
+    "chave": "p-009",
+    "bairro": "Combate",
+    "lng": -39.024709,
+    "lat": -4.970834,
+    "rua": "Rua Francisco Segundo Costa"
+  },
+  {
+    "chave": "c-luciana",
+    "bairro": "Combate",
+    "lng": -39.027069,
+    "lat": -4.972878,
+    "rua": "Rua José Roque Pires"
+  }
+]
